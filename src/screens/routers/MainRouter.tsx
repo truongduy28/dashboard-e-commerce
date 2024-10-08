@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { useDispatch } from "react-redux";
+import handleAPI from "../../apis/handleApi";
 import { removeAuth } from "../../redux/reducers/authReducer";
 
 const MainRouter = () => {
@@ -7,6 +9,15 @@ const MainRouter = () => {
   const handleLogout = () => {
     dispatch(removeAuth({}));
   };
+
+  const tryMiddleware = async () => {
+    const res = await handleAPI("test/try-middleware");
+    console.log(res);
+  };
+
+  useEffect(() => {
+    tryMiddleware();
+  }, []);
 
   return (
     <div>

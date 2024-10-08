@@ -1,5 +1,6 @@
 import axios from "axios";
 import queryString from "query-string";
+import { appInfo } from "../constants/appInfos";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:3005",
@@ -7,7 +8,7 @@ const axiosClient = axios.create({
 });
 
 axiosClient.interceptors.request.use(async (config: any) => {
-  const accesstoken = "";
+  const accesstoken = getToken();
 
   config.headers = {
     Authorization: accesstoken ? `Bearer ${accesstoken}` : "",
@@ -33,3 +34,8 @@ axiosClient.interceptors.response.use(
 );
 
 export default axiosClient;
+
+const getToken = (): string => {
+  const authInfo = localStorage.getItem(appInfo.localKey)
+  return JSON.parse(authInfo as any).token || "";
+}
