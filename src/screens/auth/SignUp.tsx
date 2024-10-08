@@ -6,10 +6,14 @@ import { appInfo } from "../../constants/appInfos";
 import SocialLogin from "./components/SocialLogin";
 import handleAPI from "../../apis/handleApi";
 import { REGISTER } from "../../constants/endpoint";
+import { useDispatch } from "react-redux";
+import { RegisterResponse } from "../../interfaces/user";
+import { addAuth } from "../../redux/reducers/authReducer";
 
 const { Title, Paragraph, Text } = Typography;
 
 const SignUp = () => {
+  const dispatch = useDispatch();
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -20,8 +24,14 @@ const SignUp = () => {
   }) => {
     try {
       setIsLoading(true);
-      const res = await handleAPI(REGISTER, value, "post");
-      message.success((res as any).message);
+      const res = (await handleAPI(
+        REGISTER,
+        value,
+        "post"
+      )) as unknown as RegisterResponse;
+
+      !!res.data.token && dispatch(addAuth(res.data));
+      message.success(res.message);
     } catch (error) {
       message.error((error as any).message);
     } finally {

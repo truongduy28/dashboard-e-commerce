@@ -1,5 +1,7 @@
 import { ConfigProvider } from "antd";
 import Routers from "./screens/routers/Routers";
+import { Provider as ReduxProvider } from "react-redux";
+import store from "./redux/store";
 
 function App() {
   return (
@@ -10,7 +12,9 @@ function App() {
         },
       }}
     >
-      <Routers />;
+      <ReduxProvider store={store}>
+        <Routers />;
+      </ReduxProvider>
     </ConfigProvider>
   );
 }

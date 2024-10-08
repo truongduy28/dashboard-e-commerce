@@ -1,28 +1,51 @@
-import { Button, Card, Checkbox, Form, Input, Space, Typography } from "antd";
+import {
+  Button,
+  Card,
+  Checkbox,
+  Form,
+  Input,
+  message,
+  Space,
+  Typography,
+} from "antd";
 import { appInfo } from "../../constants/appInfos";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import SocialLogin from "./components/SocialLogin";
+import { addAuth, AuthState } from "../../redux/reducers/authReducer";
+import { useDispatch } from "react-redux";
+import handleAPI from "../../apis/handleApi";
+import { LOGIN } from "../../constants/endpoint";
+import { RegisterResponse } from "../../interfaces/user";
 
 const { Title, Paragraph, Text } = Typography;
 
 const Login = () => {
+  const dispatch = useDispatch();
   const [form] = Form.useForm();
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    setIsLoading(true);
-    setTimeout(() => {
+  const handleLogin = async (value: { email: string; password: string }) => {
+    try {
+      setIsLoading(true);
+      const res = (await handleAPI(
+        LOGIN,
+        value,
+        "post"
+      )) as unknown as RegisterResponse;
+      message.success(res.message);
+      res.data.token && dispatch(addAuth(res.data));
+    } catch (error) {
+      message.error((error as any).message);
+    } finally {
       setIsLoading(false);
-    }, 2000);
-    const { email, password } = form.getFieldsValue();
-    console.log("Login handler with data: ", { email, password });
+    }
   };
 
   return (
     <>
-      <Card size="default">
+      <Card>
         {/* Logo section */}
         <div className="text-center">
           <img

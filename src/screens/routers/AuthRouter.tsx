@@ -29,12 +29,14 @@ const AuthRouter = () => {
         </div>
 
         <div className="col content-center my-auto">
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/sign-up" element={<SignUp />} />
-            </Routes>
-          </BrowserRouter>
+          <div className="mx-auto w-75">
+            <BrowserRouter>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/sign-up" element={<SignUp />} />
+              </Routes>
+            </BrowserRouter>
+          </div>
         </div>
       </div>
     </div>
