@@ -3,7 +3,7 @@ import queryString from "query-string";
 import { appInfo } from "../constants/appInfos";
 
 const axiosClient = axios.create({
-  baseURL: "http://localhost:3005",
+  baseURL: process.env.REACT_APP_SERVER_URL,
   paramsSerializer: (params) => queryString.stringify(params),
 });
 
@@ -36,6 +36,6 @@ axiosClient.interceptors.response.use(
 export default axiosClient;
 
 const getToken = (): string => {
-  const authInfo = localStorage.getItem(appInfo.localKey)
-  return JSON.parse(authInfo as any).token || "";
-}
+  const authInfo = localStorage.getItem(appInfo.localKey);
+  return JSON.parse(authInfo as any)?.token || "";
+};

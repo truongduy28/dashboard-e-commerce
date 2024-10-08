@@ -8,15 +8,15 @@ import {
   Space,
   Typography,
 } from "antd";
-import { appInfo } from "../../constants/appInfos";
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import SocialLogin from "./components/SocialLogin";
-import { addAuth, AuthState } from "../../redux/reducers/authReducer";
 import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 import handleAPI from "../../apis/handleApi";
+import { appInfo } from "../../constants/appInfos";
 import { LOGIN } from "../../constants/endpoint";
 import { AuthResponse } from "../../interfaces/user";
+import { addAuth } from "../../redux/reducers/authReducer";
+import SocialLogin from "./components/SocialLogin";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -25,7 +25,7 @@ const Login = () => {
   const [form] = Form.useForm();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isRemember, setIsRemember] = useState(false);
+  const [isRemember, setIsRemember] = useState(true);
 
   const handleLogin = async (value: { email: string; password: string }) => {
     try {
@@ -119,7 +119,10 @@ const Login = () => {
         {/* Options section */}
         <div className="row mb-4">
           <div className="col">
-            <Checkbox onChange={(e) => setIsRemember(e.target.checked)}>
+            <Checkbox
+              onChange={(e) => setIsRemember(e.target.checked)}
+              checked={isRemember}
+            >
               Remember for 30 days
             </Checkbox>
           </div>
