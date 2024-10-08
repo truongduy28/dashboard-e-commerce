@@ -16,7 +16,7 @@ import { addAuth, AuthState } from "../../redux/reducers/authReducer";
 import { useDispatch } from "react-redux";
 import handleAPI from "../../apis/handleApi";
 import { LOGIN } from "../../constants/endpoint";
-import { RegisterResponse } from "../../interfaces/user";
+import { AuthResponse } from "../../interfaces/user";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -34,7 +34,7 @@ const Login = () => {
         LOGIN,
         value,
         "post"
-      )) as unknown as RegisterResponse;
+      )) as unknown as AuthResponse;
       message.success(res.message);
       res.data.token && dispatch(addAuth({ ...res.data, isRemember }));
     } catch (error) {
@@ -128,9 +128,6 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Social login */}
-        <SocialLogin />
-
         {/* Login button */}
         <div className="mt-4 mb-3">
           <Button
@@ -145,6 +142,9 @@ const Login = () => {
             Login
           </Button>
         </div>
+
+        {/* Social login */}
+        <SocialLogin isRemember={isRemember} />
 
         {/* Sign up link */}
         <div className="mt-3 text-center">

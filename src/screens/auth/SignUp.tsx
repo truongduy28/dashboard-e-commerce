@@ -7,7 +7,7 @@ import SocialLogin from "./components/SocialLogin";
 import handleAPI from "../../apis/handleApi";
 import { REGISTER } from "../../constants/endpoint";
 import { useDispatch } from "react-redux";
-import { RegisterResponse } from "../../interfaces/user";
+import { AuthResponse } from "../../interfaces/user";
 import { addAuth } from "../../redux/reducers/authReducer";
 
 const { Title, Paragraph, Text } = Typography;
@@ -28,7 +28,7 @@ const SignUp = () => {
         REGISTER,
         value,
         "post"
-      )) as unknown as RegisterResponse;
+      )) as unknown as AuthResponse;
 
       !!res.data.token && dispatch(addAuth({ ...res.data, isRemember: true }));
       message.success(res.message);
@@ -126,9 +126,6 @@ const SignUp = () => {
         </Form.Item>
       </Form>
 
-      {/* Social login */}
-      <SocialLogin />
-
       {/* Sign up button */}
       <div className="mt-4 mb-3">
         <Button
@@ -143,6 +140,9 @@ const SignUp = () => {
           Sign Up
         </Button>
       </div>
+
+      {/* Social login */}
+      <SocialLogin isRemember={true} />
 
       {/* Login link */}
       <div className="mt-3 text-center">

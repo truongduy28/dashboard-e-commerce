@@ -1,3 +1,4 @@
 const REGISTER = "/auth/register";
 const LOGIN = "/auth/login";
-export { REGISTER, LOGIN };
+const GOOGLE_LOGIN = "/auth/google-login";
+export { REGISTER, LOGIN, GOOGLE_LOGIN };

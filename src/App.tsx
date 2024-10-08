@@ -13,7 +13,7 @@ function App() {
       }}
     >
       <ReduxProvider store={store}>
-        <Routers />;
+        <Routers />
       </ReduxProvider>
     </ConfigProvider>
   );
