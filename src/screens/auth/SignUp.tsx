@@ -30,7 +30,7 @@ const SignUp = () => {
         "post"
       )) as unknown as RegisterResponse;
 
-      !!res.data.token && dispatch(addAuth(res.data));
+      !!res.data.token && dispatch(addAuth({ ...res.data, isRemember: true }));
       message.success(res.message);
     } catch (error) {
       message.error((error as any).message);

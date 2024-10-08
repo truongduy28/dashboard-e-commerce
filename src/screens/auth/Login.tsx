@@ -25,6 +25,7 @@ const Login = () => {
   const [form] = Form.useForm();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isRemember, setIsRemember] = useState(false);
 
   const handleLogin = async (value: { email: string; password: string }) => {
     try {
@@ -35,7 +36,7 @@ const Login = () => {
         "post"
       )) as unknown as RegisterResponse;
       message.success(res.message);
-      res.data.token && dispatch(addAuth(res.data));
+      res.data.token && dispatch(addAuth({ ...res.data, isRemember }));
     } catch (error) {
       message.error((error as any).message);
     } finally {
@@ -118,7 +119,9 @@ const Login = () => {
         {/* Options section */}
         <div className="row mb-4">
           <div className="col">
-            <Checkbox>Remember for 30 days</Checkbox>
+            <Checkbox onChange={(e) => setIsRemember(e.target.checked)}>
+              Remember for 30 days
+            </Checkbox>
           </div>
           <div className="col text-right">
             <Link to="/forgot-password">Forgot password?</Link>
