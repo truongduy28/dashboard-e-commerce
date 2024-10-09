@@ -1,13 +1,13 @@
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import AuthRouter from "./AuthRouter";
+import { appInfo } from "../constants/appInfos";
 import {
   addAuth,
   authSelector,
   AuthState,
-} from "../../redux/reducers/authReducer";
+} from "../redux/reducers/authReducer";
+import AuthRouter from "./AuthRouter";
 import MainRouter from "./MainRouter";
-import { useEffect } from "react";
-import { appInfo } from "../../constants/appInfos";
 
 const Routers = () => {
   const dispatch = useDispatch();
