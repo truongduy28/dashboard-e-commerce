@@ -1,3 +1,4 @@
+import { QueryClient } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
@@ -10,9 +11,8 @@ import {
 } from "antd";
 import { User } from "iconsax-react";
 import { forwardRef, useRef, useState } from "react";
-import handleAPI from "../../apis/handleApi";
 import { colors } from "../../constants/appInfos";
-import { ADD_SUPPLIER } from "../../constants/endpoint";
+import { useAddSupplier } from "../../hooks/tanstackquery/useSupplier";
 import { SupplierResponse } from "../../interfaces/supplier";
 import { uploadFile } from "../../utils/file";
 
@@ -25,14 +25,16 @@ interface Props {
 }
 
 const SupplierForms = ({ onClose, onOk, visible }: Props) => {
+  const queryClient = new QueryClient();
+  // API: Add new supplier
+  const { mutate: addSupplier, isPending: isLoading } = useAddSupplier();
+
   const [form] = Form.useForm();
   const inpFileRef = useRef<any>();
   const [file, setFile] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [isTaking, setIsTaking] = useState(false);
 
   const handleSubmit = async (value: any) => {
-    setIsLoading(true);
     try {
       if (file) {
         const photoUrl = await uploadFile(file);
@@ -40,20 +42,15 @@ const SupplierForms = ({ onClose, onOk, visible }: Props) => {
       }
       value.isTaking = isTaking ? 1 : 0;
 
-      const res = (await handleAPI(
-        ADD_SUPPLIER,
-        value,
-        "post"
-      )) as unknown as SupplierResponse;
-      console.log(res);
-      if (res.data) {
-        message.success(res.message);
-        onOk();
-      }
+      addSupplier(value, {
+        onSuccess: (res: SupplierResponse) => {
+          queryClient.invalidateQueries({ queryKey: ["get-suppliers"] }); // TODO: refetch list not working
+          message.success(res.message);
+          onOk();
+        },
+      });
     } catch (error) {
       console.log("Error when add new supplier: ", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 

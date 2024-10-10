@@ -1,18 +1,18 @@
 import { Button, Space, Table, Typography } from "antd";
 import { ColumnProps } from "antd/es/table";
 import { Sort } from "iconsax-react";
-import { useEffect, useState } from "react";
-import handleAPI from "../../apis/handleApi";
 import { SupplierForms } from "../../components";
-import { GET_SUPPLIERS } from "../../constants/endpoint";
+import { useGetSuppliers } from "../../hooks/tanstackquery/useSupplier";
 import { useDialog } from "../../hooks/useDialogV2";
-import { ISupplier, SuppliersResponse } from "../../interfaces/supplier";
+import { ISupplier } from "../../interfaces/supplier";
 import { titleFromPath } from "../../utils/formater";
 
 const { Title, Text } = Typography;
 const SupplierScreen = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
+  // API: Get all suppliers
+  const { data: suppliersResponse, isLoading } = useGetSuppliers();
+
+  const suppliers = suppliersResponse?.data?.items || [];
 
   const columns: ColumnProps<ISupplier>[] = [
     {
@@ -53,24 +53,6 @@ const SupplierScreen = () => {
   ];
 
   const { isShow, toggle } = useDialog();
-
-  useEffect(() => {
-    getSuppliers();
-  }, []);
-
-  const getSuppliers = async () => {
-    try {
-      setIsLoading(true);
-      const res = (await handleAPI(
-        GET_SUPPLIERS
-      )) as unknown as SuppliersResponse;
-      setSuppliers(res.data.items);
-    } catch (error) {
-      console.log("Error when get suppliers: ", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const TitlePartial = () => {
     const titleText = titleFromPath();
