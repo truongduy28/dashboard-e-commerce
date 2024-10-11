@@ -26,10 +26,10 @@ const SocialLogin = ({ isRemember }: Props) => {
     try {
       const google = await signInWithPopup(auth, provider);
       if (google) {
-        const { email, displayName } = google.user;
+        const { email, displayName, photoURL } = google.user;
         const res = (await handleAPI(
           GOOGLE_LOGIN,
-          { email, name: displayName },
+          { email, name: displayName, photoURL },
           "post"
         )) as unknown as AuthResponse;
         !!res.data.token && dispatch(addAuth({ ...res.data, isRemember }));

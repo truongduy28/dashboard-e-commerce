@@ -6,12 +6,14 @@ export interface AuthState {
     _id: string;
     name: string;
     rule: number;
+    photoUrl: string;
 }
 
 const initialState = {
     token: '',
     _id: '',
     name: '',
+    photoUrl: '',
     rule: 0,
 };
 

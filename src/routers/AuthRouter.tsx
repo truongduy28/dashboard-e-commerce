@@ -6,6 +6,10 @@ import { Login, SignUp } from "../screens";
 const { Title } = Typography;
 
 const AuthRouter = () => {
+  // get pathname
+  const pathname = window.location.pathname;
+  if (pathname === "/") window.location.pathname = "login";
+
   return (
     <div className="container-fluid" style={{ height: "100vh" }}>
       <div className="row h-100">

@@ -1,12 +1,24 @@
 import { Avatar, Button, Dropdown, Input, MenuProps, Space } from "antd";
+import { signOut } from "firebase/auth";
 import { Notification, SearchNormal1 } from "iconsax-react";
+import { useDispatch, useSelector } from "react-redux";
 import { colors } from "../constants/appInfos";
+import { auth } from "../firebase/config";
+import { authSelector, removeAuth } from "../redux/reducers/authReducer";
 
 const CustomHeader = () => {
+  const dispatch = useDispatch();
+  const { user } = useSelector(authSelector);
+
   const items: MenuProps["items"] = [
     {
       key: "logout",
-      label: "Đăng xuất",
+      label: "Sign out",
+      onClick: () => {
+        signOut(auth);
+        localStorage.clear();
+        dispatch(removeAuth(undefined));
+      },
     },
   ];
   return (
@@ -26,12 +38,7 @@ const CustomHeader = () => {
             icon={<Notification size={22} color={colors.gray600} />}
           />
           <Dropdown menu={{ items }}>
-            <Avatar
-              src={
-                "https://s3.cloud.cmctelecom.vn/2game-vn/pictures/images/2016/4/28/2game_28_4_NgocRongDaiChien_1.png"
-              }
-              size={40}
-            />
+            <Avatar src={user.photoUrl} size={40} />
           </Dropdown>
         </Space>
       </div>

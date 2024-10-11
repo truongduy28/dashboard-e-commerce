@@ -3,6 +3,7 @@ export interface AuthResponse {
     data: {
         name: string;
         email: string;
+        photoUrl: string;
         createdAt: string;
         updatedAt: string;
         _id: string;
