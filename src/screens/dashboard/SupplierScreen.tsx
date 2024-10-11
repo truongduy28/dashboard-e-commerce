@@ -1,17 +1,26 @@
-import { Button, Space, Table, Typography } from "antd";
+import { UseMutateFunction, useQueryClient } from "@tanstack/react-query";
+import { Button, Modal, Space, Table, Typography } from "antd";
 import { ColumnProps } from "antd/es/table";
 import { Edit2, Sort, UserRemove } from "iconsax-react";
 import { useState } from "react";
 import { SupplierForms } from "../../components";
-import { useGetSuppliers } from "../../hooks/tanstackquery/useSupplier";
+import {
+  useDeleteSupplier,
+  useGetSuppliers,
+} from "../../hooks/tanstackquery/useSupplier";
 import { useDialog } from "../../hooks/useDialogV2";
 import { ISupplier } from "../../interfaces/supplier";
 import { titleFromPath } from "../../utils/formater";
 
 const { Title, Text } = Typography;
+const { confirm } = Modal;
+
 const SupplierScreen = () => {
   // API: Get all suppliers
   const { data: suppliersResponse, isLoading } = useGetSuppliers();
+
+  // API: Delete supplier
+  const { mutate: deleteSupplier } = useDeleteSupplier();
 
   const suppliers = suppliersResponse?.data?.items || [];
 
@@ -59,16 +68,13 @@ const SupplierScreen = () => {
       align: "center",
       dataIndex: "",
       render: (value: ISupplier) => (
-        <Space>
-          <Button
-            icon={<Edit2 size={18} className="text-info" />}
-            onClick={() => {
-              setSupplierSelected(value);
-              toggle();
-            }}
-          />
-          <Button icon={<UserRemove size={18} className="text-danger" />} />
-        </Space>
+        <ActionButtonPartial
+          key={value._id}
+          value={value}
+          toggleForm={toggle}
+          onRowSelected={setSupplierSelected}
+          deleteFn={deleteSupplier}
+        />
       ),
     },
   ];
@@ -121,3 +127,45 @@ const SupplierScreen = () => {
 };
 
 export default SupplierScreen;
+
+const ActionButtonPartial = ({
+  value,
+  onRowSelected,
+  toggleForm,
+  deleteFn,
+}: {
+  value: ISupplier;
+  onRowSelected: (value: ISupplier) => void;
+  toggleForm: () => void;
+  deleteFn: UseMutateFunction<any, any, any, any>;
+}) => {
+  const queryClient = useQueryClient();
+
+  return (
+    <Space>
+      <Button
+        icon={<Edit2 size={18} className="text-info" />}
+        onClick={() => {
+          onRowSelected(value);
+          toggleForm();
+        }}
+      />
+      <Button
+        icon={<UserRemove size={18} className="text-danger" />}
+        onClick={() =>
+          confirm({
+            title: "Confirm",
+            content: "Are you sure you want to delete this supplier?",
+            onOk: () =>
+              deleteFn(value._id, {
+                onSuccess: () =>
+                  queryClient.invalidateQueries({
+                    queryKey: ["get-suppliers"],
+                  }),
+              }),
+          })
+        }
+      />
+    </Space>
+  );
+};

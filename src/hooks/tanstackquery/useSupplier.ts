@@ -22,3 +22,9 @@ export const useUpdateSupplier = (id: string) =>
     mutationFn: async (data: any) =>
       await handleAPI(`${UPDATE_SUPPLIER}?id=${id}`, data, "put"),
   })
+
+export const useDeleteSupplier = () =>
+  useMutation<any, any, any, any>({
+    mutationFn: async (id: string) =>
+      await handleAPI(`${UPDATE_SUPPLIER}?id=${id}`, { isDeleted: true }, "put"),
+  })
