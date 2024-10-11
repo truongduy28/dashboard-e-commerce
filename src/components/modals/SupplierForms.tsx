@@ -1,4 +1,4 @@
-import { QueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
@@ -24,12 +24,11 @@ const { Paragraph } = Typography;
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onOk: () => void;
   supplier: ISupplier | undefined;
 }
 
-const SupplierForms = ({ onClose, onOk, visible, supplier }: Props) => {
-  const queryClient = new QueryClient();
+const SupplierForms = ({ onClose, visible, supplier }: Props) => {
+  const queryClient = useQueryClient();
 
   // API: Add new supplier
   const addApi = useAddSupplier();
@@ -60,9 +59,9 @@ const SupplierForms = ({ onClose, onOk, visible, supplier }: Props) => {
 
       mutate(value, {
         onSuccess: (res: SupplierResponse) => {
-          queryClient.invalidateQueries({ queryKey: ["get-suppliers"] }); // TODO: refetch list not working
+          queryClient.invalidateQueries({ queryKey: ["get-suppliers"] });
           message.success(res.message);
-          onOk();
+          closeModal();
         },
       });
     } catch (error) {

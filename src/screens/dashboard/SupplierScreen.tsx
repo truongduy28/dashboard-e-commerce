@@ -114,7 +114,6 @@ const SupplierScreen = () => {
           setSupplierSelected(undefined);
           toggle();
         }}
-        onOk={toggle}
         supplier={supplierSelected}
       />
     </div>
