@@ -1,6 +1,7 @@
 import { Button, Space, Table, Typography } from "antd";
 import { ColumnProps } from "antd/es/table";
-import { Sort } from "iconsax-react";
+import { Edit2, Sort, UserRemove } from "iconsax-react";
+import { useState } from "react";
 import { SupplierForms } from "../../components";
 import { useGetSuppliers } from "../../hooks/tanstackquery/useSupplier";
 import { useDialog } from "../../hooks/useDialogV2";
@@ -48,11 +49,34 @@ const SupplierScreen = () => {
     {
       key: "onTheWay",
       title: "On the way",
-      render: () => <p className="text-center">-</p>,
+      dataIndex: "active",
+      render: (value: number) => <Text>{value || "-"}</Text>,
+      align: "center",
+    },
+    {
+      key: "action",
+      title: "Action",
+      align: "center",
+      dataIndex: "",
+      render: (value: ISupplier) => (
+        <Space>
+          <Button
+            icon={<Edit2 size={18} className="text-info" />}
+            onClick={() => {
+              setSupplierSelected(value);
+              toggle();
+            }}
+          />
+          <Button icon={<UserRemove size={18} className="text-danger" />} />
+        </Space>
+      ),
     },
   ];
 
   const { isShow, toggle } = useDialog();
+  const [supplierSelected, setSupplierSelected] = useState<
+    ISupplier | undefined
+  >();
 
   const TitlePartial = () => {
     const titleText = titleFromPath();
@@ -84,7 +108,15 @@ const SupplierScreen = () => {
       />
 
       {/* Supplier forms to add and update information */}
-      <SupplierForms visible={isShow} onClose={toggle} onOk={toggle} />
+      <SupplierForms
+        visible={isShow}
+        onClose={() => {
+          setSupplierSelected(undefined);
+          toggle();
+        }}
+        onOk={toggle}
+        supplier={supplierSelected}
+      />
     </div>
   );
 };

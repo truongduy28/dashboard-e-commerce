@@ -10,10 +10,13 @@ import {
   Typography,
 } from "antd";
 import { User } from "iconsax-react";
-import { forwardRef, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { colors } from "../../constants/appInfos";
-import { useAddSupplier } from "../../hooks/tanstackquery/useSupplier";
-import { SupplierResponse } from "../../interfaces/supplier";
+import {
+  useAddSupplier,
+  useUpdateSupplier,
+} from "../../hooks/tanstackquery/useSupplier";
+import { ISupplier, SupplierResponse } from "../../interfaces/supplier";
 import { uploadFile } from "../../utils/file";
 
 const { Paragraph } = Typography;
@@ -22,19 +25,32 @@ interface Props {
   visible: boolean;
   onClose: () => void;
   onOk: () => void;
+  supplier: ISupplier | undefined;
 }
 
-const SupplierForms = ({ onClose, onOk, visible }: Props) => {
+const SupplierForms = ({ onClose, onOk, visible, supplier }: Props) => {
   const queryClient = new QueryClient();
+
   // API: Add new supplier
-  const { mutate: addSupplier, isPending: isLoading } = useAddSupplier();
+  const addApi = useAddSupplier();
+  // API: Update supplier
+  const updateApi = useUpdateSupplier(supplier?._id || "");
+  // API: Switch API
+  const { mutate, isPending: isLoading } = supplier ? updateApi : addApi;
 
   const [form] = Form.useForm();
   const inpFileRef = useRef<any>();
   const [file, setFile] = useState<any>(null);
   const [isTaking, setIsTaking] = useState(false);
 
-  const handleSubmit = async (value: any) => {
+  useEffect(() => {
+    if (supplier) {
+      form.setFieldsValue(supplier);
+      setIsTaking(supplier.isTaking === 1);
+    }
+  }, [form, supplier]);
+
+  const handleSubmit = async (value: ISupplier) => {
     try {
       if (file) {
         const photoUrl = await uploadFile(file);
@@ -42,7 +58,7 @@ const SupplierForms = ({ onClose, onOk, visible }: Props) => {
       }
       value.isTaking = isTaking ? 1 : 0;
 
-      addSupplier(value, {
+      mutate(value, {
         onSuccess: (res: SupplierResponse) => {
           queryClient.invalidateQueries({ queryKey: ["get-suppliers"] }); // TODO: refetch list not working
           message.success(res.message);
@@ -54,13 +70,20 @@ const SupplierForms = ({ onClose, onOk, visible }: Props) => {
     }
   };
 
+  const closeModal = () => {
+    form.resetFields();
+    setFile(null);
+    setIsTaking(false);
+    onClose();
+  };
+
   return (
     <Modal
       open={visible}
-      onClose={onClose}
+      onClose={closeModal}
       onOk={form.submit}
-      onCancel={onClose}
-      title="Add Supplier"
+      onCancel={closeModal}
+      title={`${supplier ? "Update" : "Add"} Supplier`}
     >
       <Form
         disabled={isLoading}
@@ -69,7 +92,12 @@ const SupplierForms = ({ onClose, onOk, visible }: Props) => {
         wrapperCol={{ span: 18 }}
         form={form}
       >
-        <AvatarFormPartial ref={inpFileRef} file={file} onChange={setFile} />
+        <AvatarFormPartial
+          ref={inpFileRef}
+          file={file}
+          onChange={setFile}
+          url={supplier?.photoUrl || ""}
+        />
         <Form.Item
           label="Supplier name"
           name="name"
@@ -83,6 +111,22 @@ const SupplierForms = ({ onClose, onOk, visible }: Props) => {
           rules={[{ required: true, message: "Please enter product name" }]}
         >
           <Input size="large" placeholder="Enter product name" allowClear />
+        </Form.Item>
+        <Form.Item label="Email" name={"email"}>
+          <Input
+            size="large"
+            placeholder="Enter product email"
+            allowClear
+            type="email"
+          />
+        </Form.Item>
+        <Form.Item label="On the way" name={"active"}>
+          <Input
+            size="large"
+            placeholder="Enter product active on the way"
+            allowClear
+            type="number"
+          />
         </Form.Item>
         <Form.Item name={"categories"} label="Categories">
           <Select
@@ -143,7 +187,11 @@ const TypeFormPartial = ({
 
 const AvatarFormPartial = forwardRef(
   (
-    { file, onChange }: { file: any; onChange: (val: any) => void },
+    {
+      url,
+      file,
+      onChange,
+    }: { url: string; file: any; onChange: (val: any) => void },
     ref: any
   ) => {
     return (
@@ -152,14 +200,13 @@ const AvatarFormPartial = forwardRef(
           className="row text-center justify-content-center mb-4"
           htmlFor="inpFile"
         >
-          {file ? (
-            <Avatar size={100} src={URL.createObjectURL(file)} />
+          {file || url ? (
+            <Avatar size={100} src={file ? URL.createObjectURL(file) : url} />
           ) : (
             <Avatar size={100}>
               <User size={60} color={colors.gray600} />
             </Avatar>
           )}
-
           <div className="pl-2 my-auto">
             <Paragraph className="text-muted m-0">Drag image here</Paragraph>
             <Paragraph className="text-muted mb-0">Or</Paragraph>

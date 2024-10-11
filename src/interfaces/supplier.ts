@@ -4,6 +4,9 @@ export interface ISupplier {
   product: string;
   categories: string[];
   isTaking: number;
+  photoUrl: string;
+  email: string;
+  active: number;
   contact: string;
   createdAt: string;
   updatedAt: string;
