@@ -1,4 +1,4 @@
-import { Layout } from "antd";
+import { Affix, Layout } from "antd";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { CustomHeader, CustomSider } from "../components";
 import {
@@ -17,9 +17,13 @@ const MainRouter = () => {
   return (
     <BrowserRouter>
       <Layout>
-        <CustomSider />
+        <Affix offsetTop={0}>
+          <CustomSider />
+        </Affix>
         <Layout>
-          <CustomHeader />
+          <Affix offsetTop={0}>
+            <CustomHeader />
+          </Affix>
           <Content className="pt-3 container-fluid">
             <Routes>
               <Route path="/" element={<HomeScreen />} />

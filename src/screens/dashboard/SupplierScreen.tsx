@@ -9,6 +9,7 @@ import {
   useGetSuppliers,
 } from "../../hooks/tanstackquery/useSupplier";
 import { useDialog } from "../../hooks/useDialogV2";
+import usePagination from "../../hooks/usePagination";
 import { ISupplier } from "../../interfaces/supplier";
 import { titleFromPath } from "../../utils/formater";
 
@@ -16,15 +17,29 @@ const { Title, Text } = Typography;
 const { confirm } = Modal;
 
 const SupplierScreen = () => {
+  const { page, pageSize, setPage, setPageSize } = usePagination();
   // API: Get all suppliers
-  const { data: suppliersResponse, isLoading } = useGetSuppliers();
+  const { data: suppliersResponse, isLoading } = useGetSuppliers({
+    page,
+    pageSize,
+  });
 
   // API: Delete supplier
   const { mutate: deleteSupplier } = useDeleteSupplier();
 
   const suppliers = suppliersResponse?.data?.items || [];
+  const total = suppliersResponse?.data?.total || 0;
 
   const columns: ColumnProps<ISupplier>[] = [
+    {
+      key: "index",
+      title: "#",
+      render: (_value, _record, index) => {
+        return (
+          <p className="text-center">{(page - 1) * pageSize + index + 1}</p>
+        );
+      },
+    },
     {
       key: "name",
       title: "Supplier name",
@@ -107,6 +122,16 @@ const SupplierScreen = () => {
   return (
     <div>
       <Table
+        pagination={{
+          total: total,
+          onChange(page, pageSize) {
+            setPage(page);
+            setPageSize(pageSize);
+          },
+          pageSize: pageSize,
+          style: { textAlign: "center" },
+        }}
+        scroll={{ x: "max-content" }}
         dataSource={suppliers}
         columns={columns}
         title={TitlePartial}
