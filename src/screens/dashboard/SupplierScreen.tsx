@@ -4,6 +4,7 @@ import { ColumnProps } from "antd/es/table";
 import { Edit2, Sort, UserRemove } from "iconsax-react";
 import { useState } from "react";
 import { SupplierForms } from "../../components";
+import ExportExcel from "../../components/modals/ExportExcel";
 import {
   useDeleteSupplier,
   useGetSuppliers,
@@ -95,6 +96,7 @@ const SupplierScreen = () => {
   ];
 
   const { isShow, toggle } = useDialog();
+  const { isShow: isDownloadShow, toggle: toggleDownload } = useDialog();
   const [supplierSelected, setSupplierSelected] = useState<
     ISupplier | undefined
   >();
@@ -112,7 +114,7 @@ const SupplierScreen = () => {
               Add Supplier
             </Button>
             <Button icon={<Sort size={20} />}>Filters</Button>
-            <Button>Download all</Button>
+            <Button onClick={toggleDownload}>Download all</Button>
           </Space>
         </div>
       </div>
@@ -137,7 +139,6 @@ const SupplierScreen = () => {
         title={TitlePartial}
         loading={isLoading}
       />
-
       {/* Supplier forms to add and update information */}
       <SupplierForms
         visible={isShow}
@@ -146,6 +147,22 @@ const SupplierScreen = () => {
           toggle();
         }}
         supplier={supplierSelected}
+      />
+
+      {/* Supplier download excel */}
+      <ExportExcel
+        visible={isDownloadShow}
+        onClose={toggleDownload}
+        columns={
+          (columns.map((c) => ({ label: c.title, value: c.key })) as any) || []
+        }
+        nameReplacer={[
+          { previous: "type", new: "isTaking" },
+          {
+            previous: "onTheWay",
+            new: "active",
+          },
+        ]}
       />
     </div>
   );

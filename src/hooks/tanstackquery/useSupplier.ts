@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import handleAPI from "../../apis/handleApi";
 import {
   ADD_SUPPLIER,
+  EXPORT_SUPPLIER,
   GET_SUPPLIERS,
   UPDATE_SUPPLIER,
 } from "../../constants/endpoint";
@@ -44,3 +45,8 @@ export const useDeleteSupplier = () =>
         "put"
       ),
   });
+
+export const useExportSupplier = () => useMutation<any, any, any, any>({
+  mutationFn: async (data: { startDate?: string; endDate?: string; columns: string[] }) =>
+    await handleAPI(EXPORT_SUPPLIER, data, "post"),
+});
