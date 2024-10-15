@@ -19,3 +19,18 @@ export const replaceName = (str: string) => {
     .replace(/ /g, "-")
     .replace(/[:!@#$%^&*()?;/]/g, "");
 };
+
+export class FormatCurrency {
+  static VND = new Intl.NumberFormat(`vi-VN`, {
+    style: 'currency',
+    currency: 'VND',
+  });
+
+  static USD = new Intl.NumberFormat(`en-US`, {
+    style: 'currency',
+    currency: 'USD',
+  });
+}
+
+export const formatNumber = (num: string) =>
+  num.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
