@@ -2,6 +2,7 @@ import { Affix, Layout } from "antd";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { CustomHeader, CustomSider } from "../components";
 import {
+  AddProductScreen,
   CategoryScreen,
   HomeScreen,
   InventoryScreen,
@@ -33,6 +34,10 @@ const MainRouter = () => {
               <Route path="orders" element={<OrderScreen />} />
               <Route path="manage-store" element={<ManagerStoreScreen />} />
               <Route path="inventory" element={<InventoryScreen />} />
+              <Route
+                path="inventory/add-product"
+                element={<AddProductScreen />}
+              />
             </Routes>
           </Content>
           <Footer />

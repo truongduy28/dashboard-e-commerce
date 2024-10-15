@@ -3,14 +3,15 @@ import SignUp from "./auth/SignUp";
 
 import CategoryScreen from "./dashboard/CategoryScreen";
 import HomeScreen from "./dashboard/HomeScreen";
-import InventoryScreen from "./dashboard/InventoryScreen";
+import AddProductScreen from "./dashboard/inventory/AddProductScreen";
+import InventoryScreen from "./dashboard/inventory/InventoryScreen";
 import ManagerStoreScreen from "./dashboard/ManagerStoreScreen";
 import OrderScreen from "./dashboard/OrderScreen";
 import ReportScreen from "./dashboard/ReportScreen";
 import SupplierScreen from "./dashboard/SupplierScreen";
 
 export {
-  CategoryScreen,
+  AddProductScreen, CategoryScreen,
   HomeScreen,
   InventoryScreen,
   Login,
@@ -18,5 +19,5 @@ export {
   OrderScreen,
   ReportScreen,
   SignUp,
-  SupplierScreen,
+  SupplierScreen
 };
