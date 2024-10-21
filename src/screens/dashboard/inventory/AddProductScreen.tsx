@@ -1,9 +1,26 @@
 import { Editor } from "@tinymce/tinymce-react";
-import { Button, Card, Form, Input, Select, Space, Typography } from "antd";
+import {
+  Button,
+  Card,
+  Divider,
+  Form,
+  Input,
+  Select,
+  Space,
+  TreeSelect,
+  Typography,
+} from "antd";
 import { useForm } from "antd/es/form/Form";
 import TextArea from "antd/es/input/TextArea";
+import { Add } from "iconsax-react";
 import { useMemo, useRef } from "react";
+import CategoryForms from "../../../components/modals/CategoryForms";
+import { useGetCategories } from "../../../hooks/tanstackquery/useCategory";
 import { useGetSuppliers } from "../../../hooks/tanstackquery/useSupplier";
+import { useDialog } from "../../../hooks/useDialogV2";
+import { CategoryResponse } from "../../../interfaces/category";
+import { TreeNode } from "../../../interfaces/common";
+import { config } from "../../../utils/tyniMCE";
 
 const { Title } = Typography;
 
@@ -31,6 +48,21 @@ const AddProductScreen = () => {
       }));
     return [];
   }, [suppliers]);
+
+  // API: Get categories
+  const { data: categories } = useGetCategories({ page: 1, size: 999999 });
+
+  const categoryOptions = useMemo(() => {
+    if (categories?.data) {
+      const treeData = transformToTreeData(categories);
+      return treeData;
+    }
+    return [];
+  }, [categories]);
+
+  // DIALOG
+  const { isShow: isShowCategoryForms, toggle: toggleCategoryForms } =
+    useDialog();
 
   const [form] = useForm();
   const editorRef = useRef<any>(null);
@@ -62,44 +94,29 @@ const AddProductScreen = () => {
                 apiKey={process.env.REACT_APP_TINYMCE_API_KEY}
                 onInit={(_evt, editor) => (editorRef.current = editor)}
                 initialValue=""
-                init={{
-                  height: 350,
-                  menubar: false,
-                  plugins: [
-                    "advlist",
-                    "autolink",
-                    "lists",
-                    "link",
-                    "image",
-                    "charmap",
-                    "preview",
-                    "anchor",
-                    "searchreplace",
-                    "visualblocks",
-                    "code",
-                    "fullscreen",
-                    "insertdatetime",
-                    "media",
-                    "table",
-                    "code",
-                    "help",
-                    "wordcount",
-                  ],
-                  toolbar:
-                    "undo redo | blocks | " +
-                    "bold italic forecolor | alignleft aligncenter " +
-                    "alignright alignjustify | bullist numlist outdent indent | " +
-                    "removeformat | help",
-                  content_style:
-                    "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
-                }}
+                init={config}
               />
             </Form.Item>
           </div>
           <div className="col">
             <Card size="small">
               <Form.Item name="categories" label="Categories">
-                <Select />
+                <TreeSelect
+                  treeData={categoryOptions}
+                  dropdownRender={(menu) => (
+                    <>
+                      {menu}
+                      <Divider className="m-0" />
+                      <Button
+                        type="link"
+                        icon={<Add />}
+                        onClick={toggleCategoryForms}
+                      >
+                        Add category
+                      </Button>
+                    </>
+                  )}
+                />
               </Form.Item>
             </Card>
             <Card size="small" className="mt-3">
@@ -129,8 +146,43 @@ const AddProductScreen = () => {
           </div>
         </div>
       </Form>
+      <CategoryForms
+        categories={categoryOptions}
+        visible={isShowCategoryForms}
+        onClose={toggleCategoryForms}
+      />
     </div>
   );
 };
 
 export default AddProductScreen;
+
+function transformToTreeData(products: CategoryResponse): TreeNode[] {
+  const productMap: Record<string, TreeNode> = {};
+
+  // Step 1: Create nodes for each product
+  products.data.forEach((product) => {
+    productMap[product._id] = {
+      value: product._id,
+      title: product.title,
+      children: [],
+    };
+  });
+
+  const treeData: TreeNode[] = [];
+
+  // Step 2: Assign children to their parents
+  products.data.forEach((product) => {
+    if (product.parentId) {
+      const parent = productMap[product.parentId];
+      if (parent) {
+        parent.children?.push(productMap[product._id]);
+      }
+    } else {
+      // If there's no parentId, it's a root node
+      treeData.push(productMap[product._id]);
+    }
+  });
+
+  return treeData;
+}
