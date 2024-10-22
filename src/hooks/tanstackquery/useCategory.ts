@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import handleAPI from "../../apis/handleApi";
-import { ADD_CATEGORY, DELETE_CATEGORY, GET_CATEGORIES } from "../../constants/endpoint";
+import { ADD_CATEGORY, DELETE_CATEGORY, GET_CATEGORIES, UPDATE_CATEGORY } from "../../constants/endpoint";
 import { CategoryPayload, CategoryResponse } from "../../interfaces/category";
 
 const useAddCategory = () => useMutation<any, any, any, any>({
@@ -16,4 +16,8 @@ const useDeleteCategory = () => useMutation<any, any, any, any>({
     mutationFn: async ({ id, isDeleted }: { id: string, isDeleted: boolean }) => await handleAPI(`${DELETE_CATEGORY}?id=${id}&isDeleted=${isDeleted}`, {}, "delete"),
 })
 
-export { useAddCategory, useDeleteCategory, useGetCategories };
+const useUpdateCategory = (id: string | undefined) => useMutation<any, any, any, any>({
+    mutationFn: id ? async (data: CategoryPayload) => await handleAPI(`${UPDATE_CATEGORY}?id=${id}`, data, "put") : undefined,
+})
+
+export { useAddCategory, useDeleteCategory, useGetCategories, useUpdateCategory };

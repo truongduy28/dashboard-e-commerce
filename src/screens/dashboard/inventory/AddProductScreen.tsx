@@ -157,7 +157,8 @@ const AddProductScreen = () => {
 
 export default AddProductScreen;
 
-function transformToTreeData(products: CategoryResponse): TreeNode[] {
+export function transformToTreeData(products: CategoryResponse): TreeNode[] {
+  if (!products) return [];
   const productMap: Record<string, TreeNode> = {};
 
   // Step 1: Create nodes for each product
