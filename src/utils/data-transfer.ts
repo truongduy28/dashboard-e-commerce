@@ -43,3 +43,41 @@ export const transformToTreeOptions = <T>(
 
     return treeData;
 }
+
+
+type TreeTable<T> = T & {
+    key: string | number;
+    children?: TreeTable<T>[];
+};
+
+export const transformToTreeTable = <T>(
+    data: T[],
+    idField: keyof T,
+    parentIdField: keyof T,
+    rootParentValue: any
+): TreeTable<T>[] => {
+    const map = new Map<string | number, TreeTable<T>>();
+    const treeData: TreeTable<T>[] = [];
+
+    data.forEach(item => {
+        const key = item[idField] as unknown as string;
+        const newItem: TreeTable<T> = { ...item, key };
+        map.set(key, newItem);
+    });
+
+    data.forEach(item => {
+        const parentId = item[parentIdField];
+        const key = item[idField] as unknown as string | number;
+        if (parentId === rootParentValue) {
+            treeData.push(map.get(key)!);
+        } else {
+            const parentItem = map.get(parentId as unknown as string | number);
+            if (parentItem) {
+                parentItem.children = parentItem.children || [];
+                parentItem.children.push(map.get(key)!);
+            }
+        }
+    });
+
+    return treeData;
+};

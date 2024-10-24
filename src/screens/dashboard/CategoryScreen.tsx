@@ -24,10 +24,14 @@ import {
   useUpdateCategory,
 } from "../../hooks/tanstackquery/useCategory";
 import { CategoryPayload, ICategory } from "../../interfaces/category";
-import { transformToTreeOptions } from "../../utils/data-transfer";
+import {
+  transformToTreeOptions,
+  transformToTreeTable,
+} from "../../utils/data-transfer";
 import { formatSlug, sanitizePayload } from "../../utils/formater";
 
 const { Title } = Typography;
+
 const CategoryScreen = () => {
   // API: Get all categories
   const { data: categories, isLoading: isLoadingCategories } = useGetCategories(
@@ -35,7 +39,7 @@ const CategoryScreen = () => {
   );
   const categoriesData: ICategory[] = useMemo(() => {
     if (categories?.data) {
-      return categories?.data;
+      return transformToTreeTable(categories.data, "_id", "parentId", "");
     }
     return [];
   }, [categories]);
@@ -46,6 +50,7 @@ const CategoryScreen = () => {
       title: "Title",
       dataIndex: "title",
       key: "title",
+      width: 250,
     },
     {
       title: "Description",
