@@ -1,5 +1,5 @@
-export type TreeNode = {
+export type TreeOption = {
     value: string;
     title: string;
-    children?: TreeNode[];
+    children?: TreeOption[];
 };

@@ -18,8 +18,7 @@ import CategoryForms from "../../../components/modals/CategoryForms";
 import { useGetCategories } from "../../../hooks/tanstackquery/useCategory";
 import { useGetSuppliers } from "../../../hooks/tanstackquery/useSupplier";
 import { useDialog } from "../../../hooks/useDialogV2";
-import { CategoryResponse } from "../../../interfaces/category";
-import { TreeNode } from "../../../interfaces/common";
+import { transformToTreeOptions } from "../../../utils/data-transfer";
 import { config } from "../../../utils/tyniMCE";
 
 const { Title } = Typography;
@@ -54,7 +53,12 @@ const AddProductScreen = () => {
 
   const categoryOptions = useMemo(() => {
     if (categories?.data) {
-      const treeData = transformToTreeData(categories);
+      const treeData = transformToTreeOptions(
+        categories.data,
+        (item) => item._id,
+        (item) => item.title,
+        (item) => item.parentId
+      );
       return treeData;
     }
     return [];
@@ -156,34 +160,3 @@ const AddProductScreen = () => {
 };
 
 export default AddProductScreen;
-
-export function transformToTreeData(products: CategoryResponse): TreeNode[] {
-  if (!products) return [];
-  const productMap: Record<string, TreeNode> = {};
-
-  // Step 1: Create nodes for each product
-  products.data.forEach((product) => {
-    productMap[product._id] = {
-      value: product._id,
-      title: product.title,
-      children: [],
-    };
-  });
-
-  const treeData: TreeNode[] = [];
-
-  // Step 2: Assign children to their parents
-  products.data.forEach((product) => {
-    if (product.parentId) {
-      const parent = productMap[product.parentId];
-      if (parent) {
-        parent.children?.push(productMap[product._id]);
-      }
-    } else {
-      // If there's no parentId, it's a root node
-      treeData.push(productMap[product._id]);
-    }
-  });
-
-  return treeData;
-}

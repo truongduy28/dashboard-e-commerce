@@ -23,13 +23,9 @@ import {
   useGetCategories,
   useUpdateCategory,
 } from "../../hooks/tanstackquery/useCategory";
-import {
-  CategoryPayload,
-  CategoryResponse,
-  ICategory,
-} from "../../interfaces/category";
+import { CategoryPayload, ICategory } from "../../interfaces/category";
+import { transformToTreeOptions } from "../../utils/data-transfer";
 import { formatSlug, sanitizePayload } from "../../utils/formater";
-import { transformToTreeData } from "./inventory/AddProductScreen";
 
 const { Title } = Typography;
 const CategoryScreen = () => {
@@ -84,7 +80,7 @@ const CategoryScreen = () => {
         </div>
         <div className="col-4">
           <FormPartial
-            categories={categories as CategoryResponse}
+            categories={categories?.data || []}
             selectedCategory={selected}
             setSelectedCategory={setSelected}
           />
@@ -149,11 +145,11 @@ const ActionButtonPartial = ({
 };
 
 const FormPartial = ({
-  categories,
+  categories = [],
   selectedCategory,
   setSelectedCategory,
 }: {
-  categories: CategoryResponse;
+  categories: ICategory[];
   selectedCategory: ICategory | undefined;
   setSelectedCategory: React.Dispatch<
     React.SetStateAction<ICategory | undefined>
@@ -176,7 +172,12 @@ const FormPartial = ({
     }
   }, [selectedCategory]);
 
-  const options = transformToTreeData(categories);
+  const options = transformToTreeOptions(
+    categories,
+    (item) => item._id,
+    (item) => item.title,
+    (item) => item.parentId
+  );
   const [form] = Form.useForm();
 
   const handleSubmit = (value: CategoryPayload) => {

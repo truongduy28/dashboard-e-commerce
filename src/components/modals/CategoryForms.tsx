@@ -3,20 +3,14 @@ import { Form, Input, Modal, TreeSelect } from "antd";
 import { useForm } from "antd/es/form/Form";
 import TextArea from "antd/es/input/TextArea";
 import { useAddCategory } from "../../hooks/tanstackquery/useCategory";
-import { TreeNode } from "../../interfaces/common";
+import { CategoryPayload } from "../../interfaces/category";
+import { TreeOption } from "../../interfaces/common";
 import { formatSlug, sanitizePayload } from "../../utils/formater";
 
 interface Props {
   visible: boolean;
   onClose: () => void;
-  categories: TreeNode[] | undefined;
-}
-
-interface Payload {
-  parentId: string;
-  title: string;
-  description: string;
-  slug: string;
+  categories: TreeOption[] | undefined;
 }
 
 const CategoryForms = ({ onClose, visible, categories }: Props) => {
@@ -25,7 +19,7 @@ const CategoryForms = ({ onClose, visible, categories }: Props) => {
   const { mutate, isPending } = useAddCategory();
   const [form] = useForm();
 
-  const handleSubmit = (value: Payload) => {
+  const handleSubmit = (value: CategoryPayload) => {
     value.slug = formatSlug(value.title);
     mutate(sanitizePayload(value), {
       onSuccess: () => {
