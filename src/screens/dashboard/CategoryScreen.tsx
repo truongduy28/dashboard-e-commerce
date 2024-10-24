@@ -35,7 +35,7 @@ const { Title } = Typography;
 const CategoryScreen = () => {
   // API: Get all categories
   const { data: categories, isLoading: isLoadingCategories } = useGetCategories(
-    { page: 1, size: 999999 }
+    { page: 1, size: 999999 } // TODO: Not yet implement pagination feature
   );
   const categoriesData: ICategory[] = useMemo(() => {
     if (categories?.data) {
