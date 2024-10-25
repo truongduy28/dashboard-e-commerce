@@ -16,6 +16,7 @@ import { useForm } from "antd/es/form/Form";
 import TextArea from "antd/es/input/TextArea";
 import { Add } from "iconsax-react";
 import { useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import CustomUpload from "../../../components/buttons/CustomUpload";
 import CategoryForms from "../../../components/modals/CategoryForms";
 import { assets } from "../../../constants/appInfos";
@@ -72,6 +73,7 @@ const AddProductScreen = () => {
 
   const [form] = useForm();
   const editorRef = useRef<any>(null);
+  const navigate = useNavigate();
   const [files, setFiles] = useState<File[]>([]);
   const [isUploadLoading, setIsUploadLoading] = useState(false);
 
@@ -98,6 +100,7 @@ const AddProductScreen = () => {
         form.resetFields();
         setFiles([]);
         message.success(data.message);
+        navigate("/inventory");
       },
     });
   };

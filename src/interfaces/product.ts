@@ -14,11 +14,19 @@ export interface CreateProductResponse {
     data: IProduct;
 }
 
-interface IProduct {
+export interface GetProductsResponse {
+    message: string;
+    data: {
+        total: number;
+        items: IProduct[];
+    }
+}
+
+export interface IProduct {
     title: string;
     slug: string;
     description: string;
-    categories: string[];
+    categories: { _id: string, title: string }[];
     supplier: string;
     content: string;
     images: string[];
