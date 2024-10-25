@@ -52,7 +52,7 @@ const SupplierForms = ({ onClose, visible, supplier }: Props) => {
   const handleSubmit = async (value: ISupplier) => {
     try {
       if (file) {
-        const photoUrl = await uploadFile(file);
+        const photoUrl = await uploadFile(file, "suppliers");
         value.photoUrl = photoUrl;
       }
       value.isTaking = isTaking ? 1 : 0;

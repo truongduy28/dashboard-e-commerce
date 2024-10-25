@@ -25,3 +25,22 @@ span.ant-menu-title-content>a:hover {
   justify-content: center;
   align-items: center;
 }
+
+/* For the /src/components/buttons/CustomUpload.tsx */
+.upload-button-wrapper {
+  border: dashed;
+  border-width: 2px;
+  width: 100px;
+  height: 100px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.upload-button-wrapper:hover {
+  opacity: 0.8;
+}
+
+/* For Ant Design Components => Image.PreviewGroup */
+.ant-space .css-dev-only-do-not-override-ccdg5a .ant-space-horizontal .ant-space-align-center .ant-space-gap-row-small .ant-space-gap-col-small {
+  flex-wrap: wrap !important;
+}

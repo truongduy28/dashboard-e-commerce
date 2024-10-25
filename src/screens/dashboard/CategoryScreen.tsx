@@ -30,7 +30,7 @@ import {
 } from "../../utils/data-transfer";
 import { formatSlug, sanitizePayload } from "../../utils/formater";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const CategoryScreen = () => {
   // API: Get all categories
@@ -48,9 +48,17 @@ const CategoryScreen = () => {
   const columns: ColumnProps<ICategory>[] = [
     {
       title: "Title",
-      dataIndex: "title",
+      dataIndex: "",
       key: "title",
       width: 250,
+      render: (value) => (
+        <>
+          {value.title}{" "}
+          <Text style={{ color: colors.primary500, fontSize: 12 }}>
+            {value.children?.length && `(${value.children?.length})`}
+          </Text>
+        </>
+      ),
     },
     {
       title: "Description",
@@ -210,7 +218,7 @@ const FormPartial = ({
         disabled={isPending}
       >
         <Form.Item label="Parent category" name={"parentId"}>
-          <TreeSelect treeData={options} allowClear />
+          <TreeSelect treeData={options} allowClear placeholder="Root level" />
         </Form.Item>
         <Form.Item
           name={"title"}

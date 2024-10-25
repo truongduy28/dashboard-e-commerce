@@ -4,7 +4,9 @@ import {
   Card,
   Divider,
   Form,
+  Image,
   Input,
+  message,
   Select,
   Space,
   TreeSelect,
@@ -13,24 +15,21 @@ import {
 import { useForm } from "antd/es/form/Form";
 import TextArea from "antd/es/input/TextArea";
 import { Add } from "iconsax-react";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
+import CustomUpload from "../../../components/buttons/CustomUpload";
 import CategoryForms from "../../../components/modals/CategoryForms";
+import { assets } from "../../../constants/appInfos";
 import { useGetCategories } from "../../../hooks/tanstackquery/useCategory";
+import { useCreateProduct } from "../../../hooks/tanstackquery/useProduct";
 import { useGetSuppliers } from "../../../hooks/tanstackquery/useSupplier";
 import { useDialog } from "../../../hooks/useDialogV2";
+import { ProductPayload } from "../../../interfaces/product";
 import { transformToTreeOptions } from "../../../utils/data-transfer";
+import { uploadFile } from "../../../utils/file";
+import { formatSlug, sanitizePayload } from "../../../utils/formater";
 import { config } from "../../../utils/tyniMCE";
 
 const { Title } = Typography;
-
-interface ProductPayload {
-  title: string;
-  description: string;
-  content: string;
-  slug: string;
-  categories: string[];
-  supplier: string;
-}
 
 const AddProductScreen = () => {
   // API: Get suppliers
@@ -64,23 +63,69 @@ const AddProductScreen = () => {
     return [];
   }, [categories]);
 
+  // API: Create product
+  const { mutate, isPending } = useCreateProduct();
+
   // DIALOG
   const { isShow: isShowCategoryForms, toggle: toggleCategoryForms } =
     useDialog();
 
   const [form] = useForm();
   const editorRef = useRef<any>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [isUploadLoading, setIsUploadLoading] = useState(false);
 
-  const handleSubmit = (value: ProductPayload) => {
+  const isLoading = isUploadLoading || isPending;
+
+  const handleSubmit = async (value: ProductPayload) => {
     const content = editorRef?.current?.getContent() || "";
     value.content = content;
-    console.log(value);
+
+    setIsUploadLoading(true);
+    let urls: string[] = [];
+    if (files.length > 0) {
+      const uploadPromises = files.map(async (file) => {
+        const url = await uploadFile(file, "products");
+        return url;
+      });
+      urls = await Promise.all(uploadPromises);
+    }
+    setIsUploadLoading(false);
+    value.images = urls;
+    value.slug = formatSlug(value.title);
+    mutate(sanitizePayload(value), {
+      onSuccess: (data) => {
+        form.resetFields();
+        setFiles([]);
+        message.success(data.message);
+      },
+    });
+  };
+
+  const selectedFiles = (file: File | FileList) => {
+    const fileExists = (newFile: File) => {
+      return files.some((existingFile) => existingFile.name === newFile.name);
+    };
+
+    if (file instanceof FileList) {
+      Array.from(file).forEach((newFile) => {
+        if (!fileExists(newFile)) {
+          setFiles((prevFiles) => [...prevFiles, newFile]);
+        }
+      });
+    }
   };
 
   return (
     <div>
       <Title style={{ fontSize: 22 }}>Add Product</Title>
-      <Form form={form} onFinish={handleSubmit} layout="vertical" size="large">
+      <Form
+        form={form}
+        onFinish={handleSubmit}
+        layout="vertical"
+        size="large"
+        disabled={isLoading}
+      >
         <div className="row">
           <div className="col">
             <Form.Item
@@ -95,6 +140,7 @@ const AddProductScreen = () => {
             </Form.Item>
             <Form.Item>
               <Editor
+                disabled={isLoading}
                 apiKey={process.env.REACT_APP_TINYMCE_API_KEY}
                 onInit={(_evt, editor) => (editorRef.current = editor)}
                 initialValue=""
@@ -102,10 +148,12 @@ const AddProductScreen = () => {
               />
             </Form.Item>
           </div>
-          <div className="col">
-            <Card size="small">
-              <Form.Item name="categories" label="Categories">
+          <div className="col-4">
+            <Card size="small" title="Categories">
+              <Form.Item name="categories">
                 <TreeSelect
+                  multiple
+                  treeDefaultExpandAll={true}
                   treeData={categoryOptions}
                   dropdownRender={(menu) => (
                     <>
@@ -123,10 +171,9 @@ const AddProductScreen = () => {
                 />
               </Form.Item>
             </Card>
-            <Card size="small" className="mt-3">
+            <Card size="small" className="mt-3" title="Supplier">
               <Form.Item
                 name="supplier"
-                label="Supplier"
                 rules={[{ required: true, message: "Supplier is required" }]}
               >
                 <Select
@@ -135,6 +182,38 @@ const AddProductScreen = () => {
                 />
               </Form.Item>
             </Card>
+            <Card
+              size="small"
+              className="mt-3"
+              title="Images"
+              extra={
+                <CustomUpload
+                  onUpload={selectedFiles}
+                  multiple
+                  shape="rectangle"
+                />
+              }
+            >
+              <Image.PreviewGroup
+                preview={{
+                  onChange: (current, prev) =>
+                    console.log(
+                      `current index: ${current}, prev index: ${prev}`
+                    ),
+                }}
+              >
+                {files.map((file) => (
+                  <Image
+                    width={100}
+                    height={100}
+                    style={{ objectFit: "cover" }}
+                    src={URL.createObjectURL(file)}
+                    key={file.name}
+                    fallback={assets.fallbackImage}
+                  />
+                ))}
+              </Image.PreviewGroup>
+            </Card>
             <Card size="small" className="mt-3">
               <Space>
                 <Button size="middle">Cancel</Button>
@@ -142,6 +221,7 @@ const AddProductScreen = () => {
                   size="middle"
                   type="primary"
                   onClick={() => form.submit()}
+                  loading={isLoading}
                 >
                   Submit
                 </Button>

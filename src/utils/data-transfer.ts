@@ -6,7 +6,6 @@ export const transformToTreeOptions = <T>(
     getTitle: (item: T) => string,
     getParentId: (item: T) => string | null
 ): TreeOption[] => {
-    console.log(products);
     if (!products || !products.length) return [];
 
     const productMap: Record<string, TreeOption> = {};
