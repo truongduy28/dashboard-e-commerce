@@ -15,13 +15,18 @@ import {
 import { useForm } from "antd/es/form/Form";
 import TextArea from "antd/es/input/TextArea";
 import { Add } from "iconsax-react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router-dom";
 import CustomUpload from "../../../components/buttons/CustomUpload";
 import CategoryForms from "../../../components/modals/CategoryForms";
 import { assets } from "../../../constants/appInfos";
 import { useGetCategories } from "../../../hooks/tanstackquery/useCategory";
-import { useCreateProduct } from "../../../hooks/tanstackquery/useProduct";
+import {
+  useCreateProduct,
+  useGetProductDetail,
+  useUpdateProduct,
+} from "../../../hooks/tanstackquery/useProduct";
 import { useGetSuppliers } from "../../../hooks/tanstackquery/useSupplier";
 import { useDialog } from "../../../hooks/useDialogV2";
 import { ProductPayload } from "../../../interfaces/product";
@@ -33,6 +38,14 @@ import { config } from "../../../utils/tyniMCE";
 const { Title } = Typography;
 
 const AddProductScreen = () => {
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("id");
+  const isUpdateMode = !!id;
+
+  // API: Get Product detail for updating
+  const { data: detailData, isLoading: isGetDetailLoading } =
+    useGetProductDetail(id);
+
   // API: Get suppliers
   const { data: suppliers } = useGetSuppliers({
     page: 1,
@@ -65,7 +78,13 @@ const AddProductScreen = () => {
   }, [categories]);
 
   // API: Create product
-  const { mutate, isPending } = useCreateProduct();
+  const createApi = useCreateProduct();
+
+  // API: Update product
+  const updateApi = useUpdateProduct(id);
+
+  // API: Routing api create or update product
+  const { mutate, isPending } = isUpdateMode ? updateApi : createApi;
 
   // DIALOG
   const { isShow: isShowCategoryForms, toggle: toggleCategoryForms } =
@@ -74,10 +93,26 @@ const AddProductScreen = () => {
   const [form] = useForm();
   const editorRef = useRef<any>(null);
   const navigate = useNavigate();
+  const [content, setContent] = useState<string>("");
   const [files, setFiles] = useState<File[]>([]);
   const [isUploadLoading, setIsUploadLoading] = useState(false);
 
-  const isLoading = isUploadLoading || isPending;
+  useEffect(() => {
+    if (detailData) {
+      const { product } = detailData.data;
+      form.setFieldsValue({
+        title: product.title,
+        description: product.description,
+        content: product.content,
+        categories: product.categories.map((category) => category._id),
+        supplier: product.supplier,
+        images: product.images,
+      });
+      setContent(product.content);
+    }
+  }, [detailData, form]);
+
+  const isLoading = isUploadLoading || isPending || isGetDetailLoading;
 
   const handleSubmit = async (value: ProductPayload) => {
     const content = editorRef?.current?.getContent() || "";
@@ -121,7 +156,9 @@ const AddProductScreen = () => {
 
   return (
     <div>
-      <Title style={{ fontSize: 22 }}>Add Product</Title>
+      <Title style={{ fontSize: 22 }}>
+        {isUpdateMode ? "Edit product information" : "Add new product"}
+      </Title>
       <Form
         form={form}
         onFinish={handleSubmit}
@@ -146,7 +183,7 @@ const AddProductScreen = () => {
                 disabled={isLoading}
                 apiKey={process.env.REACT_APP_TINYMCE_API_KEY}
                 onInit={(_evt, editor) => (editorRef.current = editor)}
-                initialValue=""
+                initialValue={content || ""}
                 init={config}
               />
             </Form.Item>
@@ -219,14 +256,16 @@ const AddProductScreen = () => {
             </Card>
             <Card size="small" className="mt-3">
               <Space>
-                <Button size="middle">Cancel</Button>
+                <Button size="middle" onClick={() => navigate(-1)}>
+                  Cancel
+                </Button>
                 <Button
                   size="middle"
                   type="primary"
                   onClick={() => form.submit()}
                   loading={isLoading}
                 >
-                  Submit
+                  {isUpdateMode ? "Update" : "Submit"}
                 </Button>
               </Space>
             </Card>

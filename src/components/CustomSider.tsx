@@ -18,7 +18,7 @@ const CustomSider = () => {
       icon: <Home2 size={20} />,
     },
     {
-      key: "inventory",
+      key: "inventory-container",
       label: "Inventory",
       icon: <MdOutlineInventory size={20} />,
       children: [
