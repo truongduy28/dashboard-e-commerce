@@ -22,7 +22,8 @@ import {
   useGetProducts,
 } from "../../../hooks/tanstackquery/useProduct";
 import { useDialog } from "../../../hooks/useDialogV2";
-import { IProduct } from "../../../interfaces/product";
+import { IProduct, ISubProduct } from "../../../interfaces/product";
+import { rangeValue } from "../../../utils/formater";
 
 const { Text } = Typography;
 
@@ -71,7 +72,7 @@ const InventoryScreen = () => {
       key: "images",
       dataIndex: "images",
       title: "Images",
-      width: 300,
+      width: 200,
       render: (item) => (
         <Avatar.Group>
           {item.map((i: string) => (
@@ -79,6 +80,48 @@ const InventoryScreen = () => {
           ))}
         </Avatar.Group>
       ),
+    },
+    {
+      key: "colors",
+      dataIndex: "subProducts",
+      title: "Colors",
+      width: 150,
+      render: (v: ISubProduct[]) => {
+        const colors = v.map((i) => i.color);
+        return <ColorsPartial items={colors} />;
+      },
+    },
+    {
+      key: "sizes",
+      dataIndex: "subProducts",
+      title: "Sizes",
+      width: 150,
+      render: (v: ISubProduct[]) => {
+        const sizes = v.map((i) => i.size);
+        return <SizesPartial items={sizes} />;
+      },
+    },
+    {
+      key: "prices",
+      dataIndex: "subProducts",
+      title: "Prices",
+      width: 150,
+      render: (v: ISubProduct[]) => {
+        const prices = v.map((i) => i.price);
+        return <PricesPartial items={prices} />;
+      },
+      align: "center",
+    },
+    {
+      key: "stocks",
+      dataIndex: "subProducts",
+      title: "Stocks",
+      width: 150,
+      render: (v: ISubProduct[]) => {
+        const value = v.reduce((a, b) => a + b.qty, 0);
+        return value > 0 ? value : "-";
+      },
+      align: "center",
     },
     {
       key: "actions",
@@ -182,4 +225,29 @@ const ActionsPartial = ({
       </Tooltip>
     </Space>
   );
+};
+
+const ColorsPartial = ({ items }: { items: string[] }) => {
+  return (
+    <Avatar.Group>
+      {items.map((i) => (
+        <Avatar key={i} style={{ backgroundColor: i }} />
+      ))}
+    </Avatar.Group>
+  );
+};
+
+const SizesPartial = ({ items }: { items: string[] }) => {
+  return (
+    <Space size={"small"} wrap>
+      {items.map((i) => (
+        <Tag key={i}>{i}</Tag>
+      ))}
+    </Space>
+  );
+};
+
+const PricesPartial = ({ items }: { items: number[] | string[] }) => {
+  const values: string[] = items.map((i) => i.toString());
+  return <Text>{rangeValue(values)}</Text>;
 };

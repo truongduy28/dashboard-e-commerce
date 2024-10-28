@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ColorPicker,
   Form,
@@ -22,6 +23,8 @@ interface Props {
   product: IProduct | undefined;
 }
 const SubProductForms = ({ onClose, visible, product }: Props) => {
+  const queryClient = useQueryClient();
+
   // API: Create sub product
   const { mutate, isPending } = useCreateSubProduct();
 
@@ -64,6 +67,7 @@ const SubProductForms = ({ onClose, visible, product }: Props) => {
     value.productId = product?._id as string;
     mutate(sanitizePayload(value), {
       onSuccess: (data) => {
+        queryClient.invalidateQueries({ queryKey: ["get-products"] });
         message.success(data.message);
         handleClose();
       },

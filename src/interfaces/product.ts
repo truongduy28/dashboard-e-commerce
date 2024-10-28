@@ -35,6 +35,7 @@ export interface IProduct {
   createdAt: string;
   updatedAt: string;
   __v: number;
+  subProducts: ISubProduct[];
 }
 
 export interface SubProductPayload {

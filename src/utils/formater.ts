@@ -54,3 +54,16 @@ export const formatSlug = (str: string) => {
     .replace(/ /g, '-')
     .replace(/[:!@#$%^&*()?;/]/g, '');
 };
+
+
+export const rangeValue = (values: string[]): string => {
+  const VND = (num: number) => FormatCurrency.VND.format(num)
+
+  if (values.length === 0) return "-";
+  if (values.length === 1) return VND(Number(values[0]));
+
+  const min = Math.min(...values.map(Number));
+  const max = Math.max(...values.map(Number));
+
+  return `${VND(min)} - ${VND(max)}`;
+};
