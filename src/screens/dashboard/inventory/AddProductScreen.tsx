@@ -4,13 +4,15 @@ import {
   Card,
   Divider,
   Form,
-  Image,
   Input,
   message,
   Select,
   Space,
   TreeSelect,
   Typography,
+  Upload,
+  UploadFile,
+  UploadProps,
 } from "antd";
 import { useForm } from "antd/es/form/Form";
 import TextArea from "antd/es/input/TextArea";
@@ -18,9 +20,7 @@ import { Add } from "iconsax-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
-import CustomUpload from "../../../components/buttons/CustomUpload";
 import CategoryForms from "../../../components/modals/CategoryForms";
-import { assets } from "../../../constants/appInfos";
 import { useGetCategories } from "../../../hooks/tanstackquery/useCategory";
 import {
   useCreateProduct,
@@ -94,7 +94,7 @@ const AddProductScreen = () => {
   const editorRef = useRef<any>(null);
   const navigate = useNavigate();
   const [content, setContent] = useState<string>("");
-  const [files, setFiles] = useState<File[]>([]);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [isUploadLoading, setIsUploadLoading] = useState(false);
 
   useEffect(() => {
@@ -109,6 +109,14 @@ const AddProductScreen = () => {
         images: product.images,
       });
       setContent(product.content);
+      setFileList(
+        product.images?.map((image) => ({
+          uid: `link-${image}`,
+          name: "image.png",
+          status: "done",
+          url: image,
+        }))
+      );
     }
   }, [detailData, form]);
 
@@ -120,38 +128,47 @@ const AddProductScreen = () => {
 
     setIsUploadLoading(true);
     let urls: string[] = [];
-    if (files.length > 0) {
-      const uploadPromises = files.map(async (file) => {
-        const url = await uploadFile(file, "products");
-        return url;
-      });
-      urls = await Promise.all(uploadPromises);
+
+    if (fileList.length > 0) {
+      for (const item of fileList) {
+        if (item.uid.startsWith("link")) {
+          urls.push(item.url as string);
+        } else {
+          const url = await uploadFile(item.originFileObj as File, "products");
+          urls.push(url);
+        }
+      }
     }
+
     setIsUploadLoading(false);
     value.images = urls;
     value.slug = formatSlug(value.title);
     mutate(sanitizePayload(value), {
       onSuccess: (data) => {
         form.resetFields();
-        setFiles([]);
+        setFileList([]);
         message.success(data.message);
         navigate("/inventory");
       },
     });
   };
 
-  const selectedFiles = (file: File | FileList) => {
-    const fileExists = (newFile: File) => {
-      return files.some((existingFile) => existingFile.name === newFile.name);
-    };
+  const handleChange: UploadProps["onChange"] = ({
+    fileList: newFileList,
+  }: any) => {
+    const items = newFileList.map((item: any) =>
+      item.originFileObj
+        ? {
+            ...item,
+            url: item.originFileObj
+              ? URL.createObjectURL(item.originFileObj)
+              : "",
+            status: "done",
+          }
+        : { ...item }
+    );
 
-    if (file instanceof FileList) {
-      Array.from(file).forEach((newFile) => {
-        if (!fileExists(newFile)) {
-          setFiles((prevFiles) => [...prevFiles, newFile]);
-        }
-      });
-    }
+    setFileList(items);
   };
 
   return (
@@ -222,37 +239,16 @@ const AddProductScreen = () => {
                 />
               </Form.Item>
             </Card>
-            <Card
-              size="small"
-              className="mt-3"
-              title="Images"
-              extra={
-                <CustomUpload
-                  onUpload={selectedFiles}
-                  multiple
-                  shape="rectangle"
-                />
-              }
-            >
-              <Image.PreviewGroup
-                preview={{
-                  onChange: (current, prev) =>
-                    console.log(
-                      `current index: ${current}, prev index: ${prev}`
-                    ),
-                }}
+            <Card size="small" className="mt-3" title="Images">
+              <Upload
+                listType="picture-card"
+                fileList={fileList}
+                multiple
+                accept="image/*"
+                onChange={handleChange}
               >
-                {files.map((file) => (
-                  <Image
-                    width={100}
-                    height={100}
-                    style={{ objectFit: "cover" }}
-                    src={URL.createObjectURL(file)}
-                    key={file.name}
-                    fallback={assets.fallbackImage}
-                  />
-                ))}
-              </Image.PreviewGroup>
+                Upload
+              </Upload>
             </Card>
             <Card size="small" className="mt-3">
               <Space>
