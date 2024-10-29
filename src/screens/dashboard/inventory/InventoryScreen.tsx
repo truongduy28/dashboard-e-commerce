@@ -22,14 +22,18 @@ import {
   useGetProducts,
 } from "../../../hooks/tanstackquery/useProduct";
 import { useDialog } from "../../../hooks/useDialogV2";
+import usePagination from "../../../hooks/usePagination";
+import useWindow from "../../../hooks/useWindow";
 import { IProduct, ISubProduct } from "../../../interfaces/product";
 import { rangeValue } from "../../../utils/formater";
 
 const { Text } = Typography;
 
 const InventoryScreen = () => {
+  const { page, pageSize, setPage, setPageSize } = usePagination();
+
   // API: Get all products
-  const { data } = useGetProducts({ page: 1, size: 999999 });
+  const { data, isLoading } = useGetProducts({ page, size: pageSize });
   const productsData = useMemo(
     () => (data?.data ? data.data.items : []),
     [data]
@@ -47,9 +51,11 @@ const InventoryScreen = () => {
       dataIndex: "description",
       title: "Description",
       width: 400,
-      render: (item) => (
+      render: (item: string) => (
         <Tooltip title={item}>
-          <Text>{item.length > 50 ? item.slice(0, 50) + "..." : item}</Text>
+          <Text>
+            {item ? (item.length > 50 ? item.slice(0, 50) + "..." : item) : "-"}
+          </Text>
         </Tooltip>
       ),
     },
@@ -144,13 +150,21 @@ const InventoryScreen = () => {
     IProduct | undefined
   >();
   const { isShow: isSubProductShow, toggle: toggleSubProduct } = useDialog();
-
+  const { innerHeight } = useWindow();
   return (
     <>
       <Table
+        pagination={{
+          total: data?.data.total || 0,
+          onChange: (page, pageSize) => {
+            setPage(page);
+            setPageSize(pageSize);
+          },
+        }}
+        loading={isLoading}
         dataSource={productsData}
         columns={columns}
-        scroll={{ x: 1200, y: 520 }}
+        scroll={{ x: 1200, y: innerHeight - 190 }}
       />
       <SubProductForms
         visible={isSubProductShow}

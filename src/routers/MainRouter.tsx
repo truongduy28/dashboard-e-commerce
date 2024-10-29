@@ -40,7 +40,7 @@ const MainRouter = () => {
               />
             </Routes>
           </Content>
-          <Footer />
+          {/* <Footer /> */}
         </Layout>
       </Layout>
     </BrowserRouter>
