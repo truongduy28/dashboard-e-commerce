@@ -2,6 +2,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   Avatar,
   Button,
+  Card,
+  Checkbox,
   message,
   Space,
   Table,
@@ -12,14 +14,16 @@ import {
 import confirm from "antd/es/modal/confirm";
 import { ColumnsType } from "antd/es/table/interface";
 import { BoxAdd, Edit2, Trash } from "iconsax-react";
-import { useMemo, useState } from "react";
+import { Key, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import SubProductForms from "../../../components/modals/SubProductForms";
 import { appColors } from "../../../constants/antd";
 import { antdColors } from "../../../constants/appInfos";
+import { useGetCategoryFilters } from "../../../hooks/tanstackquery/useCategory";
 import {
   useDeleteProduct,
   useGetProducts,
+  useGetSubProductFilters,
 } from "../../../hooks/tanstackquery/useProduct";
 import { useDialog } from "../../../hooks/useDialogV2";
 import usePagination from "../../../hooks/usePagination";
@@ -31,6 +35,13 @@ const { Text } = Typography;
 
 const InventoryScreen = () => {
   const { page, pageSize, setPage, setPageSize } = usePagination();
+  const [filters, setFilters] = useState({
+    title: "",
+    categories: [],
+    colors: [],
+    sizes: [],
+    price: null,
+  });
 
   // API: Get all products
   const { data, isLoading } = useGetProducts({ page, size: pageSize });
@@ -39,6 +50,20 @@ const InventoryScreen = () => {
     [data]
   );
 
+  // API: Get category filters
+  const { data: catFilters } = useGetCategoryFilters();
+
+  const catFiltersData = useMemo(
+    () =>
+      catFilters?.data
+        ? catFilters.data.map((i) => ({ text: i.title, value: i._id }))
+        : [],
+    [catFilters]
+  );
+
+  // API: Get sub product filters
+  const { data: subProductFilters } = useGetSubProductFilters();
+  console.log(subProductFilters);
   const columns: ColumnsType<IProduct> = [
     {
       key: "title",
@@ -64,6 +89,27 @@ const InventoryScreen = () => {
       dataIndex: "categories",
       title: "Categories",
       width: 300,
+      filters: catFiltersData,
+      // filterDropdown: (item) => (
+      //   <Card style={{ width: 300 }}>
+      //     <Checkbox.Group
+      //       // options={options}
+      //       // value={checkedList}
+      //       // onChange={onChange}
+      //       style={{ display: "flex", flexDirection: "column" }}
+      //     />
+      //     <div
+      //       style={{
+      //         marginTop: 16,
+      //         display: "flex",
+      //         justifyContent: "space-between",
+      //       }}
+      //     >
+      //       <Button>Reset</Button>
+      //       <Button type="primary">OK</Button>
+      //     </div>
+      //   </Card>
+      // ),
       render: (item) =>
         item.map((i: { title: string; _id: string }) => (
           <Tag
@@ -96,6 +142,12 @@ const InventoryScreen = () => {
         const colors = v.map((i) => i.color);
         return <ColorsPartial items={colors} />;
       },
+      filters: [
+        {
+          text: "All",
+          value: "all",
+        },
+      ],
     },
     {
       key: "sizes",

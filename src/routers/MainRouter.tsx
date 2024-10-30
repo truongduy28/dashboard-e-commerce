@@ -18,9 +18,9 @@ const MainRouter = () => {
   return (
     <BrowserRouter>
       <Layout>
-        <Affix offsetTop={0}>
+        {/* <Affix offsetTop={0}>
           <CustomSider />
-        </Affix>
+        </Affix> */}
         <Layout>
           <Affix offsetTop={0}>
             <CustomHeader />
