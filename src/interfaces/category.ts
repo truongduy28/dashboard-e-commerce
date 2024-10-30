@@ -20,3 +20,14 @@ export interface CategoryResponse {
     message: string;
     data: ICategory[];
 };
+
+interface MiniCategory {
+    _id: string;
+    title: string;
+    parentId: string;
+}
+
+export interface GetCategoryFilters {
+    message: string;
+    data: MiniCategory[];
+}

@@ -13,6 +13,7 @@ const ADD_CATEGORY = "/category/add-new";
 const GET_CATEGORIES = "/category";
 const DELETE_CATEGORY = "/category/delete";
 const UPDATE_CATEGORY = "/category/update";
+const GET_CATEGORY_FILTERS = "/category/category-filters";
 
 // product endpoints
 const ADD_PRODUCT = "/product/add-new";
@@ -22,6 +23,7 @@ const UPDATE_PRODUCT = "/product/update";
 const DELETE_PRODUCT = "/product/delete";
 // sub-product endpoints
 const ADD_SUB_PRODUCT = "/product/add-sub-product";
+const GET_SUB_PRODUCT_FILTERS = "/product/sub-product-filters";
 
 export {
   ADD_CATEGORY,
@@ -40,5 +42,5 @@ export {
   REGISTER,
   UPDATE_CATEGORY,
   UPDATE_PRODUCT,
-  UPDATE_SUPPLIER,
+  UPDATE_SUPPLIER, GET_CATEGORY_FILTERS, GET_SUB_PRODUCT_FILTERS
 };

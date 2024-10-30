@@ -187,9 +187,9 @@ const FormPartial = ({
 
   const options = transformToTreeOptions(
     categories,
-    (item) => item._id,
-    (item) => item.title,
-    (item) => item.parentId
+    "_id",
+    "title",
+    "parentId"
   );
   const [form] = Form.useForm();
 

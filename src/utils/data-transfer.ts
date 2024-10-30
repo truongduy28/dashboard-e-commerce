@@ -2,9 +2,9 @@ import { TreeOption } from "../interfaces/common";
 
 export const transformToTreeOptions = <T>(
     products: T[],
-    getValue: (item: T) => string,
-    getTitle: (item: T) => string,
-    getParentId: (item: T) => string | null
+    getValue: keyof T,
+    getTitle: keyof T,
+    getParentId: keyof T
 ): TreeOption[] => {
     if (!products || !products.length) return [];
 
@@ -12,8 +12,8 @@ export const transformToTreeOptions = <T>(
 
     // Step 1: Create nodes for each product
     products.forEach((product) => {
-        const value = getValue(product);
-        const title = getTitle(product);
+        const value = product[getValue] as unknown as string;
+        const title = product[getTitle] as unknown as string;
 
         productMap[value] = {
             value: value,
@@ -26,8 +26,8 @@ export const transformToTreeOptions = <T>(
 
     // Step 2: Assign children to their parents
     products.forEach((product) => {
-        const parentId = getParentId(product);
-        const value = getValue(product);
+        const parentId = product[getParentId] as unknown as string | null;
+        const value = product[getValue] as unknown as string;
 
         if (parentId) {
             const parent = productMap[parentId];

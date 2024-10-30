@@ -76,3 +76,19 @@ export interface GetDetailProductResponse {
     subProducts: ISubProduct[];
   };
 }
+
+interface ISubProductFilters {
+
+  sizes: string[];
+  colors: string[];
+  prices: {
+    start: number;
+    end: number;
+  };
+
+}
+export interface ProductFiltersResponse {
+  message: string;
+  data: ISubProductFilters
+}
+

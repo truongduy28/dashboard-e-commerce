@@ -4,9 +4,10 @@ import {
   ADD_CATEGORY,
   DELETE_CATEGORY,
   GET_CATEGORIES,
+  GET_CATEGORY_FILTERS,
   UPDATE_CATEGORY,
 } from "../../constants/endpoint";
-import { CategoryPayload, CategoryResponse } from "../../interfaces/category";
+import { CategoryPayload, CategoryResponse, GetCategoryFilters } from "../../interfaces/category";
 
 const useAddCategory = () =>
   useMutation<any, any, any, any>({
@@ -37,13 +38,22 @@ const useUpdateCategory = (id: string | undefined) =>
   useMutation<any, any, any, any>({
     mutationFn: id
       ? async (data: CategoryPayload) =>
-          await handleAPI(`${UPDATE_CATEGORY}?id=${id}`, data, "put")
+        await handleAPI(`${UPDATE_CATEGORY}?id=${id}`, data, "put")
       : undefined,
+  });
+
+const useGetCategoryFilters = () =>
+  useQuery<GetCategoryFilters, any>({
+    queryKey: ["get-category-filters"],
+    queryFn: async () =>
+      (await handleAPI(
+        GET_CATEGORY_FILTERS
+      )) as unknown as GetCategoryFilters,
   });
 
 export {
   useAddCategory,
   useDeleteCategory,
-  useGetCategories,
-  useUpdateCategory,
+  useGetCategories, useGetCategoryFilters, useUpdateCategory
 };
+

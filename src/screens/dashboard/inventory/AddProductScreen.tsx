@@ -68,9 +68,9 @@ const AddProductScreen = () => {
     if (categories?.data) {
       const treeData = transformToTreeOptions(
         categories.data,
-        (item) => item._id,
-        (item) => item.title,
-        (item) => item.parentId
+        "_id",
+        "title",
+        "parentId"
       );
       return treeData;
     }
