@@ -44,3 +44,10 @@ span.ant-menu-title-content>a:hover {
 .ant-space .css-dev-only-do-not-override-ccdg5a .ant-space-horizontal .ant-space-align-center .ant-space-gap-row-small .ant-space-gap-col-small {
   flex-wrap: wrap !important;
 }
+
+/* For Ant Design Components =>  Table */
+.ant-table-container {
+  scrollbar-width: thin;
+  scrollbar-color: #eaeaea transparent;
+  scrollbar-gutter: stable;
+}

@@ -155,6 +155,7 @@ const InventoryScreen = () => {
     <>
       <Table
         pagination={{
+          showSizeChanger: true,
           total: data?.data.total || 0,
           onChange: (page, pageSize) => {
             setPage(page);

@@ -10,7 +10,7 @@ export const uploadFile = async (file: File, folder?: string) => {
 
   const storageRef = ref(
     storage,
-    `${folder ? folder : "images"}/${filename}-${Date.now()}`
+    `${folder ? folder : "images"}/${filename}`
   );
 
   const res = await uploadBytes(storageRef, newFile);
