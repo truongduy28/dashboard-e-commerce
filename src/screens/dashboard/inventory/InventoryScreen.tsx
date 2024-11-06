@@ -1,6 +1,6 @@
 import { Avatar, Table, Tag, Tooltip, Typography } from "antd";
 import { ColumnsType } from "antd/es/table/interface";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SubProductForms from "../../../components/modals/SubProductForms";
 import { CustomFilter } from "../../../components/table/CustomFilter";
 import RangeValue from "../../../components/table/RangeValue";
@@ -229,6 +229,11 @@ const InventoryScreen = () => {
   >();
   const { isShow: isSubProductShow, toggle: toggleSubProduct } = useDialog();
   const { innerHeight } = useWindow();
+
+  useEffect(() => {
+    setPage(1);
+  }, [filters]);
+
   return (
     <>
       <Table
