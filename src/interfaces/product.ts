@@ -19,6 +19,10 @@ export interface GetProductsResponse {
   data: {
     total: number;
     items: IProduct[];
+    rangePrice: {
+      min: number;
+      max: number;
+    }
   };
 }
 
@@ -92,3 +96,11 @@ export interface ProductFiltersResponse {
   data: ISubProductFilters
 }
 
+
+export interface FilterProductPayload {
+  title: string;
+  categories: string[];
+  colors: string[];
+  sizes: string[];
+  price: { start: number | null; end: number | null };
+}

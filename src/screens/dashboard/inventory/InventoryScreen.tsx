@@ -1,54 +1,61 @@
-import { useQueryClient } from "@tanstack/react-query";
-import {
-  Avatar,
-  Button,
-  Card,
-  Checkbox,
-  message,
-  Space,
-  Table,
-  Tag,
-  Tooltip,
-  Typography,
-} from "antd";
-import confirm from "antd/es/modal/confirm";
+import { Avatar, Table, Tag, Tooltip, Typography } from "antd";
 import { ColumnsType } from "antd/es/table/interface";
-import { BoxAdd, Edit2, Trash } from "iconsax-react";
-import { Key, useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { useMemo, useState } from "react";
 import SubProductForms from "../../../components/modals/SubProductForms";
-import { appColors } from "../../../constants/antd";
+import { CustomFilter } from "../../../components/table/CustomFilter";
+import RangeValue from "../../../components/table/RangeValue";
 import { antdColors } from "../../../constants/appInfos";
 import { useGetCategoryFilters } from "../../../hooks/tanstackquery/useCategory";
 import {
-  useDeleteProduct,
   useGetProducts,
   useGetSubProductFilters,
 } from "../../../hooks/tanstackquery/useProduct";
 import { useDialog } from "../../../hooks/useDialogV2";
 import usePagination from "../../../hooks/usePagination";
 import useWindow from "../../../hooks/useWindow";
-import { IProduct, ISubProduct } from "../../../interfaces/product";
-import { rangeValue } from "../../../utils/formater";
+import {
+  FilterProductPayload,
+  IProduct,
+  ISubProduct,
+} from "../../../interfaces/product";
+import * as TableComponents from "./_components";
 
 const { Text } = Typography;
+const {
+  ActionsPartial,
+  ColorsPartial,
+  PricesPartial,
+  SizesPartial,
+  TitlePartial,
+} = TableComponents;
 
 const InventoryScreen = () => {
   const { page, pageSize, setPage, setPageSize } = usePagination();
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<FilterProductPayload>({
     title: "",
     categories: [],
     colors: [],
     sizes: [],
-    price: null,
+    price: {
+      start: null,
+      end: null,
+    },
   });
 
   // API: Get all products
-  const { data, isLoading } = useGetProducts({ page, size: pageSize });
-  const productsData = useMemo(
-    () => (data?.data ? data.data.items : []),
-    [data]
-  );
+  const { data: products, isLoading } = useGetProducts({
+    page,
+    size: pageSize,
+    filters,
+  });
+  const { productsData, rangePriceData, total } = useMemo(() => {
+    const productsData = products?.data ? products.data.items : [];
+    const rangePriceData = products?.data
+      ? products.data.rangePrice
+      : { min: 100000, max: 10000000000 };
+    const total = products?.data ? products.data.total : 0;
+    return { productsData, rangePriceData, total };
+  }, [products]);
 
   // API: Get category filters
   const { data: catFilters } = useGetCategoryFilters();
@@ -63,7 +70,14 @@ const InventoryScreen = () => {
 
   // API: Get sub product filters
   const { data: subProductFilters } = useGetSubProductFilters();
-  console.log(subProductFilters);
+  const { colorsFilters, sizesFilters } = useMemo(() => {
+    const colors =
+      subProductFilters?.data.colors.map((i) => ({ text: i, value: i })) || [];
+    const sizes =
+      subProductFilters?.data.sizes.map((i) => ({ text: i, value: i })) || [];
+    return { colorsFilters: colors, sizesFilters: sizes };
+  }, [subProductFilters]);
+
   const columns: ColumnsType<IProduct> = [
     {
       key: "title",
@@ -90,26 +104,14 @@ const InventoryScreen = () => {
       title: "Categories",
       width: 300,
       filters: catFiltersData,
-      // filterDropdown: (item) => (
-      //   <Card style={{ width: 300 }}>
-      //     <Checkbox.Group
-      //       // options={options}
-      //       // value={checkedList}
-      //       // onChange={onChange}
-      //       style={{ display: "flex", flexDirection: "column" }}
-      //     />
-      //     <div
-      //       style={{
-      //         marginTop: 16,
-      //         display: "flex",
-      //         justifyContent: "space-between",
-      //       }}
-      //     >
-      //       <Button>Reset</Button>
-      //       <Button type="primary">OK</Button>
-      //     </div>
-      //   </Card>
-      // ),
+      filtered: !!filters.categories.length,
+      filterDropdown: (props) => (
+        <CustomFilter
+          selected={filters.categories}
+          onSelected={(items) => setFilters({ ...filters, categories: items })}
+          props={props}
+        />
+      ),
       render: (item) =>
         item.map((i: { title: string; _id: string }) => (
           <Tag
@@ -138,44 +140,68 @@ const InventoryScreen = () => {
       dataIndex: "subProducts",
       title: "Colors",
       width: 150,
-      render: (v: ISubProduct[]) => {
+      render: (v: ISubProduct[] = []) => {
         const colors = v.map((i) => i.color);
         return <ColorsPartial items={colors} />;
       },
-      filters: [
-        {
-          text: "All",
-          value: "all",
-        },
-      ],
+      filters: colorsFilters,
+      filtered: !!filters.colors.length,
+      filterDropdown: (props) => (
+        <CustomFilter
+          props={props}
+          onSelected={(v) => setFilters({ ...filters, colors: v })}
+          selected={filters.colors}
+          type="color"
+        />
+      ),
     },
     {
       key: "sizes",
       dataIndex: "subProducts",
       title: "Sizes",
       width: 150,
-      render: (v: ISubProduct[]) => {
+      render: (v: ISubProduct[] = []) => {
         const sizes = v.map((i) => i.size);
         return <SizesPartial items={sizes} />;
       },
+      filters: sizesFilters,
+      filtered: !!filters.sizes.length,
+      filterDropdown: (props) => (
+        <CustomFilter
+          props={props}
+          onSelected={(v) => setFilters({ ...filters, sizes: v })}
+          selected={filters.sizes}
+          type="tag"
+        />
+      ),
     },
     {
       key: "prices",
       dataIndex: "subProducts",
       title: "Prices",
       width: 150,
-      render: (v: ISubProduct[]) => {
+      render: (v: ISubProduct[] = []) => {
         const prices = v.map((i) => i.price);
         return <PricesPartial items={prices} />;
       },
       align: "center",
+      filtered: !!(filters.price?.start && filters.price?.end),
+      filterDropdown: (props) => (
+        <RangeValue
+          onChange={(v) => setFilters((prev) => ({ ...prev, price: v }))}
+          defaultValue={[filters.price?.start, filters.price?.end]}
+          max={rangePriceData.max}
+          min={rangePriceData.min}
+          props={props}
+        />
+      ),
     },
     {
       key: "stocks",
       dataIndex: "subProducts",
       title: "Stocks",
       width: 150,
-      render: (v: ISubProduct[]) => {
+      render: (v: ISubProduct[] = []) => {
         const value = v.reduce((a, b) => a + b.qty, 0);
         return value > 0 ? value : "-";
       },
@@ -208,16 +234,25 @@ const InventoryScreen = () => {
       <Table
         pagination={{
           showSizeChanger: true,
-          total: data?.data.total || 0,
+          total,
           onChange: (page, pageSize) => {
             setPage(page);
             setPageSize(pageSize);
           },
         }}
+        size="middle"
+        title={() => (
+          <TitlePartial
+            onchange={(text: string) =>
+              setFilters((prev) => ({ ...prev, title: text }))
+            }
+            value={filters.title}
+          />
+        )}
         loading={isLoading}
         dataSource={productsData}
         columns={columns}
-        scroll={{ x: 1200, y: innerHeight - 190 }}
+        scroll={{ x: 1200, y: innerHeight - 250 }}
       />
       <SubProductForms
         visible={isSubProductShow}
@@ -232,89 +267,3 @@ const InventoryScreen = () => {
 };
 
 export default InventoryScreen;
-
-const ActionsPartial = ({
-  item,
-  setShow,
-  setSelectedProduct,
-}: {
-  item: IProduct;
-  setShow: () => void;
-  setSelectedProduct: React.Dispatch<
-    React.SetStateAction<IProduct | undefined>
-  >;
-}) => {
-  const queryClient = useQueryClient();
-  const { mutate } = useDeleteProduct(item._id);
-  const navigate = useNavigate();
-
-  const openSubProductForms = () => {
-    setShow();
-    setSelectedProduct(item);
-  };
-
-  const deleteProduct = () => {
-    confirm({
-      type: "warning",
-      title: "Confirmation",
-      content: "Are you sure you want to delete this product?",
-      onOk: () => {
-        mutate(undefined, {
-          onSuccess(data) {
-            message.success(data.message);
-            queryClient.invalidateQueries({ queryKey: ["get-products"] });
-          },
-        });
-      },
-    });
-  };
-
-  return (
-    <Space size={"small"}>
-      <Tooltip title="Add sub product">
-        <Button type="text" className="p-0" onClick={openSubProductForms}>
-          <BoxAdd color={appColors.purple.purple4} />
-        </Button>
-      </Tooltip>
-      <Tooltip title="Edit product">
-        <Button
-          type="text"
-          className="p-0"
-          onClick={() => navigate(`/inventory/add-product?id=${item._id}`)}
-        >
-          <Edit2 color={appColors.blue.blue4} />
-        </Button>
-      </Tooltip>
-      <Tooltip title="Remove product">
-        <Button type="text" className="p-0" onClick={deleteProduct}>
-          <Trash color={appColors.red.red4} />
-        </Button>
-      </Tooltip>
-    </Space>
-  );
-};
-
-const ColorsPartial = ({ items }: { items: string[] }) => {
-  return (
-    <Avatar.Group>
-      {items.map((i) => (
-        <Avatar key={i} style={{ backgroundColor: i }} />
-      ))}
-    </Avatar.Group>
-  );
-};
-
-const SizesPartial = ({ items }: { items: string[] }) => {
-  return (
-    <Space size={"small"} wrap>
-      {items.map((i) => (
-        <Tag key={i}>{i}</Tag>
-      ))}
-    </Space>
-  );
-};
-
-const PricesPartial = ({ items }: { items: number[] | string[] }) => {
-  const values: string[] = items.map((i) => i.toString());
-  return <Text>{rangeValue(values)}</Text>;
-};

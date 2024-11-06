@@ -12,6 +12,7 @@ import {
 import {
   CreateProductResponse,
   CreateSubProductResponse,
+  FilterProductPayload,
   GetDetailProductResponse,
   GetProductsResponse,
   ProductFiltersResponse,
@@ -42,15 +43,17 @@ export const useUpdateProduct = (id: string | null) =>
 export const useGetProducts = ({
   page,
   size,
+  filters
 }: {
   page: number;
   size: number;
+  filters?: FilterProductPayload
 }) =>
   useQuery<any, any, GetProductsResponse>({
-    queryKey: ["get-products", page, size],
+    queryKey: ["get-products", page, size, filters],
     queryFn: async () =>
       await handleAPI(
-        `${GET_PRODUCT}?page=${page || 1}&pageSize=${size || 999999}`
+        `${GET_PRODUCT}?page=${page || 1}&pageSize=${size || 999999}`, undefined, 'get', { ...filters, price: filters?.price.end ? JSON.stringify(filters?.price) : undefined }
       ),
     refetchOnWindowFocus: false,
   });
@@ -84,7 +87,7 @@ export const useDeleteProduct = (id: string | null) =>
       )) as unknown as Promise<{ message: string }>,
   });
 
-export const useGetSubProductFilters = () => useQuery<ProductFiltersResponse, any, any>({
+export const useGetSubProductFilters = () => useQuery<ProductFiltersResponse, any>({
   queryKey: ["get-sub-product-filters"],
   queryFn: async () => await handleAPI(GET_SUB_PRODUCT_FILTERS) as unknown as ProductFiltersResponse,
   refetchOnWindowFocus: false,

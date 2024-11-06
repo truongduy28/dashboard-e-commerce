@@ -41,6 +41,7 @@ const SubProductForms = ({ onClose, visible, product }: Props) => {
   };
 
   const handleSubmit = async (value: SubProductPayload) => {
+    // TODO: Check upload files to firebase and components upload
     value.color =
       typeof value.color === "string"
         ? value.color
@@ -106,7 +107,7 @@ const SubProductForms = ({ onClose, visible, product }: Props) => {
         disabled={isLoading}
       >
         <Form.Item name="color" label="Color">
-          <ColorPicker format="hex" onChange={(a) => console.log(a)} />
+          <ColorPicker format="hex" />
         </Form.Item>
         <Form.Item
           rules={[
