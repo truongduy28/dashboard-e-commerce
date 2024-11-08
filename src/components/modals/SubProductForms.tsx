@@ -41,29 +41,27 @@ const SubProductForms = ({ onClose, visible, product }: Props) => {
   };
 
   const handleSubmit = async (value: SubProductPayload) => {
-    // TODO: Check upload files to firebase and components upload
     value.color =
       typeof value.color === "string"
         ? value.color
         : (value.color as unknown as AggregationColor)?.toHexString();
 
+    setIsUploading(true);
     let urls: string[] = [];
     if (fileList && fileList.length > 0) {
-      setIsUploading(true);
-      const files: File[] = fileList.map((item) => {
-        return new File([], item.name, {
-          type: item.type,
-          lastModified: item.lastModified,
-        });
-      });
-      const uploadPromises = files.map(async (file) => {
-        const url = await uploadFile(file, "sub-products");
-        return url;
-      });
-      urls = await Promise.all(uploadPromises);
-      setIsUploading(false);
+      for (const item of fileList) {
+        if (item.uid.startsWith("link")) {
+          urls.push(item.url as string);
+        } else {
+          const url = await uploadFile(
+            item.originFileObj as File,
+            "sub-products"
+          );
+          urls.push(url);
+        }
+      }
     }
-
+    setIsUploading(false);
     value.images = urls;
     value.productId = product?._id as string;
     mutate(sanitizePayload(value), {
@@ -87,7 +85,6 @@ const SubProductForms = ({ onClose, visible, product }: Props) => {
           }
         : { ...item }
     );
-
     setFileList(items);
   };
 
@@ -97,6 +94,7 @@ const SubProductForms = ({ onClose, visible, product }: Props) => {
       open={visible}
       onCancel={handleClose}
       onOk={form.submit}
+      loading={isLoading}
     >
       <Typography.Title level={5}>{product?.title}</Typography.Title>
       <Form
