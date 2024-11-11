@@ -1,11 +1,25 @@
-import { Avatar, Button, Modal, Space, Table, Tag, Typography } from "antd";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  Avatar,
+  Button,
+  message,
+  Modal,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
 import { ColumnProps } from "antd/es/table";
 import { Edit2, Trash } from "iconsax-react";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import SubProductForms from "../../../components/modals/SubProductForms";
-import { colors } from "../../../constants/appInfos";
-import { useGetProductDetail } from "../../../hooks/tanstackquery/useProduct";
+import { appColors } from "../../../constants/antd";
+import {
+  useDeleteSubProduct,
+  useGetProductDetail,
+} from "../../../hooks/tanstackquery/useProduct";
 import { useDialog } from "../../../hooks/useDialogV2";
 import { IProduct, ISubProduct } from "../../../interfaces/product";
 import { FormatCurrency } from "../../../utils/formater";
@@ -75,29 +89,10 @@ const ProductDetailPage = () => {
       key: "actions",
       dataIndex: "",
       render: (item: ISubProduct) => (
-        <Space>
-          <Button
-            type="text"
-            onClick={() => {
-              setSelectedSubProduct(item._id);
-              toggle();
-            }}
-            icon={<Edit2 variant="Bold" color={colors.primary500} size={18} />}
-          />
-          <Button
-            onClick={() =>
-              Modal.confirm({
-                title: "Confirm",
-                content:
-                  "Are you sure you want to remove this sub product item?",
-                //   onOk: async () => await handleRemoveSubProduct(item._id),
-              })
-            }
-            type="text"
-            danger
-            icon={<Trash variant="Bold" size={18} />}
-          />
-        </Space>
+        <ActionButtonsPartial
+          subProduct={item}
+          openSubProductForms={(id) => toggleSubProductForms(id)}
+        />
       ),
       align: "right",
       fixed: "right",
@@ -111,12 +106,10 @@ const ProductDetailPage = () => {
     string | undefined
   >(undefined);
 
-  const closeSubProductForm = () => {
-    setSelectedSubProduct(undefined);
+  const toggleSubProductForms = (id?: string) => {
+    setSelectedSubProduct(!!id ? id : undefined);
     toggle();
   };
-
-  const openSubProductForm = closeSubProductForm;
 
   if (isLoading) return <div>Loading...</div>; // TODO: Add skeleton when isLoading
 
@@ -127,7 +120,10 @@ const ProductDetailPage = () => {
           <Title level={3}>{product.title}</Title>
         </div>
         <div className="col text-right">
-          <Button onClick={openSubProductForm} type="primary">
+          <Button
+            onClick={() => toggleSubProductForms(undefined)}
+            type="primary"
+          >
             Add sub product
           </Button>
         </div>
@@ -138,7 +134,7 @@ const ProductDetailPage = () => {
       <SubProductForms
         product={product}
         visible={isShow}
-        onClose={closeSubProductForm}
+        onClose={toggleSubProductForms}
         subProductId={selectedSubProduct}
       />
     </div>
@@ -146,3 +142,47 @@ const ProductDetailPage = () => {
 };
 
 export default ProductDetailPage;
+
+const ActionButtonsPartial = ({
+  subProduct,
+  openSubProductForms,
+}: {
+  subProduct: ISubProduct;
+  openSubProductForms: (id: string) => void;
+}) => {
+  const { mutate } = useDeleteSubProduct(subProduct._id);
+  const queryClient = useQueryClient();
+
+  const onDelete = async () =>
+    await mutate(undefined, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["get-product-detail"] });
+        message.success("Sub product deleted successfully!!!");
+      },
+    });
+  return (
+    <Space>
+      <Tooltip title="Edit sub product">
+        <Button
+          type="text"
+          onClick={() => openSubProductForms(subProduct._id)}
+          icon={<Edit2 color={appColors.blue.blue4} size={18} />}
+        />
+      </Tooltip>
+      <Tooltip title="Remove sub product">
+        <Button
+          onClick={() =>
+            Modal.confirm({
+              title: "Confirm",
+              content: "Are you sure you want to remove this sub product item?",
+              onOk: onDelete,
+            })
+          }
+          type="text"
+          danger
+          icon={<Trash color={appColors.red.red4} />}
+        />
+      </Tooltip>
+    </Space>
+  );
+};

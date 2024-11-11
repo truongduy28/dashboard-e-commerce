@@ -4,6 +4,7 @@ import {
   ADD_PRODUCT,
   ADD_SUB_PRODUCT,
   DELETE_PRODUCT,
+  DELETE_SUB_PRODUCT,
   GET_PRODUCT,
   GET_PRODUCT_DETAIL,
   GET_SUB_PRODUCT_DETAIL,
@@ -113,4 +114,14 @@ export const useGetSubProductDetail = (id: string | undefined) =>
       ? async () => await handleAPI(`${GET_SUB_PRODUCT_DETAIL}?id=${id}`)
       : () => { },
     refetchOnWindowFocus: false,
+  });
+
+export const useDeleteSubProduct = (id: string | undefined) =>
+  useMutation<{ message: string }, any, undefined, any>({
+    mutationFn: async () =>
+      (await handleAPI(
+        `${DELETE_SUB_PRODUCT}?id=${id}`,
+        {},
+        "delete"
+      )) as unknown as Promise<{ message: string }>,
   });
