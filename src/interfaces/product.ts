@@ -104,3 +104,8 @@ export interface FilterProductPayload {
   sizes: string[];
   price: { start: number | null; end: number | null };
 }
+
+export interface SubProductDetailResponse {
+  message: string;
+  item: ISubProduct;
+}

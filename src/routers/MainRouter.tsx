@@ -8,6 +8,7 @@ import {
   InventoryScreen,
   ManagerStoreScreen,
   OrderScreen,
+  ProductDetailPage,
   ReportScreen,
   SupplierScreen,
 } from "../screens";
@@ -18,9 +19,9 @@ const MainRouter = () => {
   return (
     <BrowserRouter>
       <Layout>
-        {/* <Affix offsetTop={0}>
+        <Affix offsetTop={0}>
           <CustomSider />
-        </Affix> */}
+        </Affix>
         <Layout>
           <Affix offsetTop={0}>
             <CustomHeader />
@@ -37,6 +38,10 @@ const MainRouter = () => {
               <Route
                 path="inventory/add-product"
                 element={<AddProductScreen />}
+              />
+              <Route
+                path="inventory/detail/:slug"
+                element={<ProductDetailPage />}
               />
             </Routes>
           </Content>

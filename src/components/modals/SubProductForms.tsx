@@ -11,8 +11,12 @@ import {
   UploadProps,
 } from "antd";
 import { AggregationColor } from "antd/es/color-picker/color";
-import { useState } from "react";
-import { useCreateSubProduct } from "../../hooks/tanstackquery/useProduct";
+import { useEffect, useState } from "react";
+import {
+  useCreateSubProduct,
+  useGetSubProductDetail,
+  useUpdateSubProduct,
+} from "../../hooks/tanstackquery/useProduct";
 import { IProduct, SubProductPayload } from "../../interfaces/product";
 import { uploadFile } from "../../utils/file";
 import { sanitizePayload } from "../../utils/formater";
@@ -21,18 +25,43 @@ interface Props {
   visible: boolean;
   onClose: () => void;
   product: IProduct | undefined;
+  subProductId?: string;
 }
-const SubProductForms = ({ onClose, visible, product }: Props) => {
+const SubProductForms = ({
+  onClose,
+  visible,
+  product,
+  subProductId,
+}: Props) => {
+  const isEditMode = !!subProductId;
+
   const queryClient = useQueryClient();
 
   // API: Create sub product
-  const { mutate, isPending } = useCreateSubProduct();
+  const createApi = useCreateSubProduct();
+
+  // API: Update sub product
+  const updateApi = useUpdateSubProduct(subProductId);
+
+  // API: Routing create and update api
+  const { mutate, isPending } = isEditMode ? updateApi : createApi;
+
+  // API: Get sub-product detail to update
+  const { data: subProduct, isLoading: isSubProductLoading } =
+    useGetSubProductDetail(subProductId);
 
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<any[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
-  const isLoading = isUploading || isPending;
+  const isLoading = isUploading || isPending || isSubProductLoading;
+
+  useEffect(() => {
+    if (isEditMode && subProduct?.item) {
+      form.setFieldsValue(subProduct.item);
+      setFileList(subProduct.item.images.map((img: string) => ({ url: img })));
+    }
+  }, [subProduct, isEditMode]);
 
   const handleClose = () => {
     form.resetFields();
@@ -49,6 +78,7 @@ const SubProductForms = ({ onClose, visible, product }: Props) => {
     setIsUploading(true);
     let urls: string[] = [];
     if (fileList && fileList.length > 0) {
+      // TODO: not yet re-check upload files with updating api
       for (const item of fileList) {
         if (item.uid.startsWith("link")) {
           urls.push(item.url as string);
@@ -66,7 +96,9 @@ const SubProductForms = ({ onClose, visible, product }: Props) => {
     value.productId = product?._id as string;
     mutate(sanitizePayload(value), {
       onSuccess: (data) => {
-        queryClient.invalidateQueries({ queryKey: ["get-products"] });
+        queryClient.invalidateQueries({
+          queryKey: isEditMode ? ["get-product-detail"] : ["get-products"],
+        });
         message.success(data.message);
         handleClose();
       },

@@ -1,6 +1,7 @@
 import { Avatar, Table, Tag, Tooltip, Typography } from "antd";
 import { ColumnsType } from "antd/es/table/interface";
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import SubProductForms from "../../../components/modals/SubProductForms";
 import { CustomFilter } from "../../../components/table/CustomFilter";
 import RangeValue from "../../../components/table/RangeValue";
@@ -81,9 +82,12 @@ const InventoryScreen = () => {
   const columns: ColumnsType<IProduct> = [
     {
       key: "title",
-      dataIndex: "title",
+      dataIndex: "",
       title: "Title",
       width: 300,
+      render: (i: IProduct) => (
+        <Link to={`/inventory/detail/${i.slug}?id=${i._id}`}>{i.title}</Link>
+      ),
     },
     {
       key: "description",

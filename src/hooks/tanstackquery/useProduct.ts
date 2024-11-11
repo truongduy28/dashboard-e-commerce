@@ -6,8 +6,10 @@ import {
   DELETE_PRODUCT,
   GET_PRODUCT,
   GET_PRODUCT_DETAIL,
+  GET_SUB_PRODUCT_DETAIL,
   GET_SUB_PRODUCT_FILTERS,
   UPDATE_PRODUCT,
+  UPDATE_SUB_PRODUCT,
 } from "../../constants/endpoint";
 import {
   CreateProductResponse,
@@ -17,6 +19,7 @@ import {
   GetProductsResponse,
   ProductFiltersResponse,
   ProductPayload,
+  SubProductDetailResponse,
   SubProductPayload,
 } from "../../interfaces/product";
 
@@ -77,6 +80,16 @@ export const useCreateSubProduct = () =>
       )) as unknown as Promise<CreateSubProductResponse>,
   });
 
+export const useUpdateSubProduct = (id: string | undefined) =>
+  useMutation<{ message: string }, any, SubProductPayload, any>({
+    mutationFn: async (data: SubProductPayload) =>
+      (await handleAPI(
+        `${UPDATE_SUB_PRODUCT}?id=${id}`,
+        data,
+        "put"
+      )) as unknown as Promise<{ message: string }>,
+  })
+
 export const useDeleteProduct = (id: string | null) =>
   useMutation<{ message: string }, any, undefined, any>({
     mutationFn: async () =>
@@ -92,3 +105,12 @@ export const useGetSubProductFilters = () => useQuery<ProductFiltersResponse, an
   queryFn: async () => await handleAPI(GET_SUB_PRODUCT_FILTERS) as unknown as ProductFiltersResponse,
   refetchOnWindowFocus: false,
 });
+
+export const useGetSubProductDetail = (id: string | undefined) =>
+  useQuery<any, any, SubProductDetailResponse, any>({
+    queryKey: ["get-sub-product-detail", id],
+    queryFn: !!id
+      ? async () => await handleAPI(`${GET_SUB_PRODUCT_DETAIL}?id=${id}`)
+      : () => { },
+    refetchOnWindowFocus: false,
+  });

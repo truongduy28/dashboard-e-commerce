@@ -23,7 +23,9 @@ const UPDATE_PRODUCT = "/product/update";
 const DELETE_PRODUCT = "/product/delete";
 // sub-product endpoints
 const ADD_SUB_PRODUCT = "/product/add-sub-product";
+const UPDATE_SUB_PRODUCT = "/product/update-sub-product";
 const GET_SUB_PRODUCT_FILTERS = "/product/sub-product-filters";
+const GET_SUB_PRODUCT_DETAIL = "/product/sub-product";
 
 export {
   ADD_CATEGORY,
@@ -42,5 +44,5 @@ export {
   REGISTER,
   UPDATE_CATEGORY,
   UPDATE_PRODUCT,
-  UPDATE_SUPPLIER, GET_CATEGORY_FILTERS, GET_SUB_PRODUCT_FILTERS
+  UPDATE_SUPPLIER, GET_CATEGORY_FILTERS, GET_SUB_PRODUCT_FILTERS, GET_SUB_PRODUCT_DETAIL, UPDATE_SUB_PRODUCT
 };
