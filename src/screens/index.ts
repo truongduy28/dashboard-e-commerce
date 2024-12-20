@@ -10,15 +10,19 @@ import ManagerStoreScreen from "./dashboard/ManagerStoreScreen";
 import OrderScreen from "./dashboard/OrderScreen";
 import ReportScreen from "./dashboard/ReportScreen";
 import SupplierScreen from "./dashboard/SupplierScreen";
+import PromotionScreen from "./dashboard/ptomotion/PromotionScreen";
 
 export {
-  AddProductScreen, CategoryScreen,
+  AddProductScreen,
+  CategoryScreen,
   HomeScreen,
   InventoryScreen,
   Login,
   ManagerStoreScreen,
-  OrderScreen, ProductDetailPage, ReportScreen,
+  OrderScreen,
+  ProductDetailPage,
+  ReportScreen,
   SignUp,
-  SupplierScreen
+  SupplierScreen,
+  PromotionScreen,
 };
-

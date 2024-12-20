@@ -9,6 +9,7 @@ import {
   ManagerStoreScreen,
   OrderScreen,
   ProductDetailPage,
+  PromotionScreen,
   ReportScreen,
   SupplierScreen,
 } from "../screens";
@@ -31,6 +32,7 @@ const MainRouter = () => {
               <Route path="/" element={<HomeScreen />} />
               <Route path="categories" element={<CategoryScreen />} />
               <Route path="report" element={<ReportScreen />} />
+              <Route path="promotions" element={<PromotionScreen />} />
               <Route path="suppliers" element={<SupplierScreen />} />
               <Route path="orders" element={<OrderScreen />} />
               <Route path="manage-store" element={<ManagerStoreScreen />} />

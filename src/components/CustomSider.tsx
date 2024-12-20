@@ -38,6 +38,11 @@ const CustomSider = () => {
       icon: <FaTags size={20} className="text-muted" />,
     },
     {
+      key: "Promotions",
+      label: <Link to={"/promotions"}>Promotions</Link>,
+      icon: <Box size={20} />,
+    },
+    {
       key: "Report",
       label: <Link to={"/report"}>Report</Link>,
       icon: <Chart size={20} />,
